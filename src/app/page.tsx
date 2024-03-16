@@ -7,7 +7,7 @@ export default function Home() {
 	return (
 		<main className="flex h-full w-full flex-col ">
 			<Navbar />
-			<section className="flex h-full w-full border border-black">
+			<section className="flex h-full w-full">
 				<section className="h-full w-[20%]">
 					<SideBar />
 				</section>
@@ -17,7 +17,7 @@ export default function Home() {
 							<span className="text-3xl font-semibold">Dashboard</span>
 						</section>
 						<section className="flex h-full w-full flex-col gap-10  overflow-y-auto px-10 pt-5 ">
-							<section className="grid h-fit w-full grid-cols-4 gap-10">
+							<section className="grid h-fit w-full grid-cols-4 gap-10 border border-black">
 								<Card className="h-fit w-full">
 									<CardHeader>
 										<CardTitle className="flex items-center gap-4 text-2xl">
