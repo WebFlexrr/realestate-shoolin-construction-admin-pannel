@@ -7,16 +7,24 @@ import { Button } from './ui/button';
 import { Component, Home, Phone } from 'lucide-react';
 import { Label } from './ui/label';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const SideBar = (): React.JSX.Element => {
 	const router = useRouter();
 	const pathname = usePathname();
 	const option = pathname.split('/')[1];
-
-	console.log(pathname.split('/'));
 	return (
 		<section className="flex h-full w-full ">
 			<section className="flex h-full w-full flex-col gap-3 px-4 py-6 ">
+				<section className="flex h-auto w-full justify-center">
+					<Image
+						src={'/logos/logo.png'}
+						width={100}
+						height={0}
+						alt={''}
+						className=" w-28 "
+					/>
+				</section>
 				<Label className="text-lg font-bold">Menu</Label>
 				<Button
 					variant={option === '' ? 'default' : 'secondary'}

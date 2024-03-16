@@ -45,6 +45,7 @@
 		"no-shadow": "off",
 		"@next/next/no-page-custom-font": "off",
 		"@typescript-eslint/explicit-function-return-type": "off",
-		"@typescript-eslint/strict-boolean-expressions": "off"
+		"@typescript-eslint/strict-boolean-expressions": "off",
+		"@typescript-eslint/no-misused-promises": "off"
 	}
 }
