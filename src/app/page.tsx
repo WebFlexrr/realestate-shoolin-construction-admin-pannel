@@ -2,8 +2,6 @@ import Navbar from '@/components/Navbar';
 import SideBar from '@/components/SideBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Headset, HomeIcon, User } from 'lucide-react';
-import { DataTable } from './enquiry/data-table';
-import { EnquiryData, columns } from './enquiry/columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function Home() {
@@ -66,7 +64,7 @@ export default function Home() {
 							</Card>
 						</section>
 						<section className="h-full w-1/2 pb-20 ">
-							<DataTable columns={columns} data={EnquiryData} />
+							{/* <DataTable columns={columns} data={EnquiryData}  /> */}
 						</section>
 					</section>
 				</section>

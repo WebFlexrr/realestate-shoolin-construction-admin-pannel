@@ -21,7 +21,6 @@ const Navbar = () => {
 	const router = useRouter();
 
 	const onLogout = async () => {
-		console.log('logout req');
 		try {
 			const { data } = await axios(
 				`${process.env.NEXT_PUBLIC_API_URL}/users/logout`,
@@ -78,8 +77,6 @@ const Navbar = () => {
 							>
 								<LogOut className="mr-2 h-4 w-4" />
 								<span>Log out</span>
-
-								<DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

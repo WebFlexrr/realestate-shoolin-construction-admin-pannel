@@ -14,17 +14,22 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
-import React from 'react';
+import React, { type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
 
 interface DataTableProps<TData, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
+	create: boolean;
+	setCreate: Dispatch<SetStateAction<boolean>>;
 }
 
 export function DataTable<TData, TValue>({
 	columns,
 	data,
+	create,
+	setCreate,
 }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const table = useReactTable({
@@ -40,14 +45,22 @@ export function DataTable<TData, TValue>({
 
 	return (
 		<div className="flex w-full flex-col gap-2">
-			<div className="flex w-full items-center">
+			<div className="flex w-full items-center gap-5  py-4">
+				<Button
+					onClick={() => {
+						setCreate(!create);
+					}}
+				>
+					Create <Plus />
+				</Button>
+
 				<div
 					className={`flex-1 text-sm text-muted-foreground ${table.getFilteredSelectedRowModel().rows.length ? 'visible' : 'invisible'}`}
 				>
 					{table.getFilteredSelectedRowModel().rows.length} of{' '}
 					{table.getFilteredRowModel().rows.length} row(s) selected.
 				</div>
-				<div className="flex items-center justify-end space-x-2 py-4">
+				<div className="flex items-center justify-end space-x-2 ">
 					<Button
 						variant="outline"
 						size="sm"
@@ -102,7 +115,7 @@ export function DataTable<TData, TValue>({
 									data-state={row.getIsSelected() && 'selected'}
 								>
 									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id} className="truncate">
+										<TableCell key={cell.id} className="truncate text-base">
 											{flexRender(
 												cell.column.columnDef.cell,
 												cell.getContext()
