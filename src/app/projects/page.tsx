@@ -36,7 +36,7 @@ export default function ProjectPage() {
 		void fetchEnquiry();
 	}, []);
 
-	console.log(isEditableProjectData);
+	// console.log(isEditableProjectData);
 
 	return (
 		<main className="flex h-full w-full">
@@ -53,7 +53,7 @@ export default function ProjectPage() {
 						setIsEditOpen={setIsEditOpen}
 					/>
 				) : create ? (
-					<CreateProjectsForm create={create} setCreate={setCreate} />
+					<CreateProjectsForm setCreate={setCreate} />
 				) : (
 					<section className="flex h-full w-full flex-col py-16 ">
 						<section className=" h-auto w-full px-10 pb-5 pt-10">
@@ -66,7 +66,6 @@ export default function ProjectPage() {
 									<DataTable
 										columns={projectColumns}
 										data={projectData}
-										create={create}
 										setCreate={setCreate}
 										setIsEditableProjectData={setIsEditableProjectData}
 										setIsEditOpen={setIsEditOpen}

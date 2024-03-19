@@ -21,7 +21,6 @@ import { Plus } from 'lucide-react';
 interface DataTableProps<TData extends Project, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
-	create: boolean;
 	setCreate: Dispatch<SetStateAction<boolean>>;
 	setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
 	setIsEditOpen: Dispatch<SetStateAction<boolean>>;
@@ -30,7 +29,6 @@ interface DataTableProps<TData extends Project, TValue> {
 export function DataTable<TData extends Project, TValue>({
 	columns,
 	data,
-	create,
 	setCreate,
 	setIsEditableProjectData,
 	setIsEditOpen,

@@ -23,6 +23,7 @@ const SideBar = (): React.JSX.Element => {
 						height={0}
 						alt={''}
 						className=" w-28 "
+						priority={true}
 					/>
 				</section>
 				<Label className="text-lg font-bold">Menu</Label>
