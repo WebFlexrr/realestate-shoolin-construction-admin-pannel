@@ -18,18 +18,22 @@ import React, { type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends Project, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
 	create: boolean;
 	setCreate: Dispatch<SetStateAction<boolean>>;
+	setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
+	setIsEditOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends Project, TValue>({
 	columns,
 	data,
 	create,
 	setCreate,
+	setIsEditableProjectData,
+	setIsEditOpen,
 }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const table = useReactTable({
@@ -48,7 +52,7 @@ export function DataTable<TData, TValue>({
 			<div className="flex w-full items-center gap-5  py-4">
 				<Button
 					onClick={() => {
-						setCreate(!create);
+						setCreate(true);
 					}}
 				>
 					Create <Plus />
@@ -72,8 +76,8 @@ export function DataTable<TData, TValue>({
 						Previous
 					</Button>
 
-					{/* {table.getPageOptions()}
-					{table.getPageCount()} */}
+					{/* {table.getPageOptions()} */}
+					{/* {table.getPageCount()} */}
 					<Button
 						variant="outline"
 						size="sm"
@@ -114,14 +118,42 @@ export function DataTable<TData, TValue>({
 									key={row.id}
 									data-state={row.getIsSelected() && 'selected'}
 								>
-									{row.getVisibleCells().map((cell) => (
-										<TableCell key={cell.id} className="truncate text-base">
-											{flexRender(
-												cell.column.columnDef.cell,
-												cell.getContext()
-											)}
-										</TableCell>
-									))}
+									{row.getVisibleCells().map((cell) => {
+										// console.log(
+										// 	'Cell'
+										// 	// cell.id === '0_edit' ? '0_edit true' : 'false'
+										// 	// cell.column.columnDef.cell
+										// 	// cell.getContext().row.original
+										// );
+										return cell.id === '0_edit' ? (
+											<TableCell key={cell.id} className="truncate text-base">
+												<button
+													onClick={() => {
+														// console.log(
+														// 	'get Project Datas',
+														// 	cell.getContext().row.original
+														// );
+														setIsEditableProjectData(
+															cell.getContext().row.original
+														);
+														setIsEditOpen(true);
+													}}
+												>
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext()
+													)}
+												</button>
+											</TableCell>
+										) : (
+											<TableCell key={cell.id} className="truncate text-base">
+												{flexRender(
+													cell.column.columnDef.cell,
+													cell.getContext()
+												)}
+											</TableCell>
+										);
+									})}
 								</TableRow>
 							))
 						) : (

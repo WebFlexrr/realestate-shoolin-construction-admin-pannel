@@ -12,16 +12,12 @@ interface Project {
 	price: string;
 	tags: string[];
 	brochure: string;
-	apartmentType: string[];
-	totalUnits: number;
-	possessionDate: string;
+	apartmentType: string;
+	totalUnits: string;
+	possessionDate: Date;
 	totalFloors: string;
 	description: string;
-	amenities: Array<{
-		name: string;
-		type: boolean;
-		_id: string;
-	}>;
+	amenities: string[];
 	masterPlan: string;
 	unitPlan: Array<{
 		_id: string;

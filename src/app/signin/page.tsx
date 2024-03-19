@@ -25,10 +25,12 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 const formSchema = z.object({
-	email: z.string({
-		required_error: 'First name is required',
-		invalid_type_error: 'First name must be string',
-	}),
+	email: z
+		.string({
+			required_error: 'First name is required',
+			invalid_type_error: 'First name must be string',
+		})
+		.email(),
 
 	password: z.string({
 		required_error: 'First name is required',
@@ -48,6 +50,7 @@ export default function SignIn(): JSX.Element {
 	});
 
 	const onSubmit = async (value: FormDataType) => {
+		console.log(value);
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
 		try {
@@ -59,21 +62,11 @@ export default function SignIn(): JSX.Element {
 					withCredentials: true,
 				}
 			);
-			// const response = await fetch(
-			// 	`${process.env.NEXT_PUBLIC_API_URL}/users/adminLogin`,
-			// 	{
-			// 		method: 'POST',
-			// 		headers: {
-			// 			'Content-Type': 'application/json', // Set content type to JSON
-			// 		},
-			// 		body:JSON.stringify(value)
-			// 	}
-			// );
 
 			console.log(data);
 			router.push('/');
 		} catch (error) {
-			console.log(error);
+			console.log('error', error);
 		}
 	};
 
@@ -119,7 +112,11 @@ export default function SignIn(): JSX.Element {
 									<FormItem>
 										<FormLabel>password</FormLabel>
 										<FormControl>
-											<Input placeholder="Enter your Password" {...field} />
+											<Input
+												type="password"
+												placeholder="Enter your Password"
+												{...field}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>

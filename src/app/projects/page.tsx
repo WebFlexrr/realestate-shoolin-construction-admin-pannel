@@ -1,14 +1,43 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 'use client';
 import Navbar from '@/components/Navbar';
 import SideBar from '@/components/SideBar';
 import { DataTable } from './data-table';
-import { projectColumns, projectData } from './columns';
+import { projectColumns } from './columns';
 import CreateProjectsForm from './CreateProjectsForm';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import axios from 'axios';
+import EditProject from './EditProject';
 
 export default function ProjectPage() {
 	const [create, setCreate] = useState<boolean>(false);
+	const [projectData, setProjectData] = useState([]);
+	const [isEditOpen, setIsEditOpen] = useState(false);
+	const [isEditableProjectData, setIsEditableProjectData] = useState<
+		Project | undefined
+	>(undefined);
+	const fetchEnquiry = async () => {
+		try {
+			const { data } = await axios(
+				`${process.env.NEXT_PUBLIC_API_URL}/projects/getAllProjects`,
+				{
+					method: 'get',
+					withCredentials: true,
+				}
+			);
+
+			setProjectData(data?.data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	useEffect(() => {
+		void fetchEnquiry();
+	}, []);
+
+	console.log(isEditableProjectData);
+
 	return (
 		<main className="flex h-full w-full">
 			<section className="h-full w-[20%]">
@@ -16,7 +45,14 @@ export default function ProjectPage() {
 			</section>
 			<ScrollArea className="overflow-y-none relative h-full w-[80%]">
 				<Navbar />
-				{create ? (
+
+				{isEditOpen ? (
+					<EditProject
+						isEditableProjectData={isEditableProjectData}
+						setIsEditableProjectData={setIsEditableProjectData}
+						setIsEditOpen={setIsEditOpen}
+					/>
+				) : create ? (
 					<CreateProjectsForm create={create} setCreate={setCreate} />
 				) : (
 					<section className="flex h-full w-full flex-col py-16 ">
@@ -32,6 +68,8 @@ export default function ProjectPage() {
 										data={projectData}
 										create={create}
 										setCreate={setCreate}
+										setIsEditableProjectData={setIsEditableProjectData}
+										setIsEditOpen={setIsEditOpen}
 									/>
 								</section>
 							</section>

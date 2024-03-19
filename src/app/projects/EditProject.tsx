@@ -22,7 +22,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
 import {
 	Popover,
 	PopoverContent,
@@ -31,65 +37,51 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-
+import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 
-// const amenities = [
-// 	{
-// 		id: 'recents',
-// 		label: 'Recents',
-// 	},
-// 	{
-// 		id: 'home',
-// 		label: 'Home',
-// 	},
-// 	{
-// 		id: 'applications',
-// 		label: 'Applications',
-// 	},
-// 	{
-// 		id: 'desktop',
-// 		label: 'Desktop',
-// 	},
-// 	{
-// 		id: 'downloads',
-// 		label: 'Downloads',
-// 	},
-// 	{
-// 		id: 'documents',
-// 		label: 'Documents',
-// 	},
-// ] as const;
+interface EditProjectProps {
+	isEditableProjectData: Project | undefined;
+	setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
+	setIsEditOpen: Dispatch<SetStateAction<boolean>>;
+}
 
-const tags = [
+const amenities = [
 	{
-		id: 'underConstruction',
-		label: 'Under Construction',
+		id: 'recents',
+		label: 'Recents',
 	},
 	{
-		id: 'resident',
-		label: 'Resident',
+		id: 'home',
+		label: 'Home',
 	},
 	{
-		id: 'complete',
-		label: 'Complete',
+		id: 'applications',
+		label: 'Applications',
+	},
+	{
+		id: 'desktop',
+		label: 'Desktop',
+	},
+	{
+		id: 'downloads',
+		label: 'Downloads',
+	},
+	{
+		id: 'documents',
+		label: 'Documents',
 	},
 ] as const;
 
 const formSchema = z.object({
 	name: z.string().trim(),
 	price: z.string(),
-	tags: z.string().array(),
-	brochure: z.custom<File>((v) => v instanceof File, {
-		message: 'Brochure is required',
+	tags: z.string().trim().array(),
+	brochure: z.string().url(),
+	apartmentType: z.string({
+		required_error: 'Please select an email to display.',
 	}),
-	apartmentType: z
-		.string()
-		.array()
-		.refine((value) => value.some((item) => item), {
-			message: 'You have to select at least one item.',
-		}),
 	totalUnits: z.string(),
 	possessionDate: z.date({
 		required_error: 'A date of birth is required.',
@@ -102,109 +94,71 @@ const formSchema = z.object({
 		.refine((value) => value.some((item) => item), {
 			message: 'You have to select at least one item.',
 		}),
-
-	masterPlan: z.custom<File>((v) => v instanceof File, {
-		message: 'Master plan is required',
-	}),
-	unitPlan: z
-		.object({
-			floorNo: z.number(),
-			flatType: z
-				.object({
-					flatName: z.string(),
-					image: z.string(),
-					coveredArea: z.string(),
-					stairArea: z.string(),
-					builtUpArea: z.string(),
-					serviceArea: z.string(),
-					totalArea: z.string(),
-					sold: z.boolean(),
-					price: z.string(),
-				})
-				.array(),
-		})
-		.array(),
+	// amenities: z
+	// 	.object({
+	// 		name: z.string(),
+	// 		type: z.boolean(),
+	// 	})
+	// 	.array(),
+	masterPlan: z.string().url(),
+	// unitPlan: z.object({
+	// 	_id: string(),
+	// 	floorNo: z.number(),
+	// 	flatType: z
+	// 		.object({
+	// 			_id: string(),
+	// 			flatName: z.string(),
+	// 			image: z.string(),
+	// 			coveredArea: z.string(),
+	// 			stairArea: z.string(),
+	// 			builtUpArea: z.string(),
+	// 			serviceArea: z.string(),
+	// 			totalArea: z.string(),
+	// 			price: z.string(),
+	// 		})
+	// 		.array(),
+	// }),
 	map: z.string().url(),
 	address: z.string().trim(),
-	thumbnail: z.custom<File>((v) => v instanceof File, {
-		message: 'thumbnail is required',
-	}),
-	coverImages: z
-		.custom<File>((v) => v instanceof File, {
-			message: 'coverImages is required',
-		})
-		.array(),
-	isPublished: z.boolean().default(false).optional(),
+	thumbnail: z.string().url(),
+	coverImages: z.string().trim().array(),
+	isPublished: z.boolean(),
 });
 
 type form = z.infer<typeof formSchema>;
 
-interface CreateProjectsFormProps {
-	create: boolean;
-	setCreate: Dispatch<SetStateAction<boolean>>;
-}
-
-const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
-	create,
-	setCreate,
+const EditProject: FC<EditProjectProps> = ({
+	isEditableProjectData,
+	setIsEditableProjectData,
+	setIsEditOpen,
 }) => {
+	console.log(isEditableProjectData);
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: '',
-			price: '',
-			tags: ['', ''],
-			apartmentType: ['', ''],
-			totalUnits: '',
-			possessionDate: new Date(),
-			totalFloors: '',
-			description: '',
-			amenities: ['', ''],
-			unitPlan: [
-				{
-					floorNo: 0,
-					flatType: [
-						{
-							flatName: '',
-							image: '',
-							coveredArea: '',
-							stairArea: '',
-							builtUpArea: '',
-							serviceArea: '',
-							totalArea: '',
-							sold: false,
-							price: '',
-						},
-					],
-				},
-			],
-			map: '',
-			address: '',
-			isPublished: false,
-		},
+		defaultValues: { ...isEditableProjectData, brochure: '', masterPlan: '' },
 	});
 
-	// const { control,handleSubmit } = form;
+	// function onSubmit(values: z.infer<typeof formSchema>) {
+	// 	// Do something with the form values.
+	// 	// ✅ This will be type-safe and validated.
+	// 	console.log(values);
+	// }
 
-	// const {
-	// 	fields,
-	// } = useFieldArray({
-	// 	name: 'unitPlan',
-	// 	control,
-	// });
-
-	const onSubmit = async (values: form) => {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log('get value', values);
-	};
-
+	// const formSubmit = async (formData) => {
+	// 	try {
+	// 		const query = await formData.post();
+	// 		console.log(query);
+	// 	} catch (error) {
+	// 		console.log(error);
+	// 	}
+	// };
 	return (
 		<section className="mx-auto h-full w-full max-w-7xl flex-col py-16 ">
 			<section className="h-fit w-full py-4">
 				<Button
 					onClick={() => {
-						setCreate(false);
+						setIsEditOpen(false);
+						setIsEditableProjectData(undefined);
 					}}
 				>
 					<ArrowLeft /> Back
@@ -213,15 +167,13 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 			<Card className=" w-full rounded-lg border  bg-background  ">
 				<Form {...form}>
 					<form
-						// action={`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`}
-
-						// encType={'multipart/form-data'}
-						onSubmit={form.handleSubmit(onSubmit)}
+						action={`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`}
+						method="POST"
 					>
 						<CardHeader className="w-full ">
 							<CardTitle className="flex w-full justify-between">
 								<section className="flex w-full items-center justify-between ">
-									<span>Create a new Project</span>
+									<span>Edit the project</span>
 									<section className="flex gap-5 ">
 										<FormField
 											control={form.control}
@@ -264,11 +216,9 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 												<FormItem>
 													<FormLabel>Project Name</FormLabel>
 													<FormControl>
-														<Input
-															placeholder="Enter Project Name"
-															{...field}
-														/>
+														<Input placeholder="Enter Name" {...field} />
 													</FormControl>
+
 													<FormMessage />
 												</FormItem>
 											)}
@@ -282,61 +232,6 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 													<FormControl>
 														<Input placeholder="Enter the Price" {...field} />
 													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
-										<FormField
-											control={form.control}
-											name="tags"
-											render={() => (
-												<FormItem>
-													<div className="mb-4">
-														<FormLabel className="text-base">Tags</FormLabel>
-														<FormDescription>
-															Select the minimum one items.
-														</FormDescription>
-													</div>
-													<section className="flex w-full gap-3">
-														{tags.map((item) => (
-															<FormField
-																key={item.id}
-																control={form.control}
-																name="tags"
-																render={({ field }) => {
-																	return (
-																		<FormItem
-																			key={item.id}
-																			className="flex flex-row items-start space-x-3 space-y-0"
-																		>
-																			<FormControl>
-																				<Checkbox
-																					checked={field.value?.includes(
-																						item.id
-																					)}
-																					onCheckedChange={(checked) => {
-																						checked
-																							? field.onChange([
-																									...field.value,
-																									item.id,
-																								])
-																							: field.onChange(
-																									field.value?.filter(
-																										(value) => value !== item.id
-																									)
-																								);
-																					}}
-																				/>
-																			</FormControl>
-																			<FormLabel className="font-normal">
-																				{item.label}
-																			</FormLabel>
-																		</FormItem>
-																	);
-																}}
-															/>
-														))}
-													</section>
 
 													<FormMessage />
 												</FormItem>
@@ -345,27 +240,22 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 										<FormField
 											control={form.control}
 											name="brochure"
-											render={({ field: { ref, name, onBlur, onChange } }) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Brochure</FormLabel>
 													<FormControl>
 														<Input
 															type="file"
 															placeholder="Enter the Price"
-															// {...field}
-															ref={ref}
-															name={name}
-															onBlur={onBlur}
-															onChange={(e) => {
-																onChange(e.target.files?.[0]);
-															}}
+															{...field}
 														/>
 													</FormControl>
+
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										{/* <FormField
+										<FormField
 											control={form.control}
 											name="apartmentType"
 											render={({ field }) => (
@@ -380,17 +270,24 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 																<SelectValue placeholder="Type" />
 															</SelectTrigger>
 															<SelectContent className="w-full">
-																<SelectItem value={'2'}>2 BHK</SelectItem>
+																<SelectItem value={'2BHK & 3BHK '}>
+																	2 BHK
+																</SelectItem>
 																<SelectItem value={'3'}>3 BHK</SelectItem>
-																<SelectItem value={'4'}>4BHK</SelectItem>
+																<SelectItem value={'4'}>System</SelectItem>
 															</SelectContent>
 														</Select>
+														{/* <Input
+													type="string"
+													placeholder="Enter the Apartment Type"
+													{...field}
+												/> */}
 													</FormControl>
 
 													<FormMessage />
 												</FormItem>
 											)}
-										/> */}
+										/>
 										<FormField
 											control={form.control}
 											name="totalUnits"
@@ -468,10 +365,10 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 										/>
 									</CardContent>
 								</Card>
-								{/* <Card>
+								<Card>
 									<CardHeader>
 										<CardTitle>Project Contents</CardTitle>
-										<CardDescription>this is a initial Information</CardDescription>
+										{/* <CardDescription>this is a initial Information</CardDescription> */}
 									</CardHeader>
 									<CardContent className=" space-y-4">
 										<FormField
@@ -547,27 +444,37 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 										<FormField
 											control={form.control}
 											name="masterPlan"
-											render={({ field: { ref, name, onBlur, onChange } }) => (
+											render={({ field }) => (
 												<FormItem>
 													<FormLabel>Master Plan</FormLabel>
 													<FormControl>
 														<Input
 															type="file"
-															ref={ref}
-															name={name}
-															onBlur={onBlur}
-															onChange={(e) => {
-																onChange(e.target.files?.[0]);
-															}}
-															placeholder="Master Plan"
-															// {...field}
+															placeholder="Description"
+															{...field}
 														/>
 													</FormControl>
 													<FormMessage />
 												</FormItem>
 											)}
 										/>
-										
+										{/* <FormField
+											control={form.control}
+											name="unitPlan"
+											render={({ field }) => (
+												<FormItem>
+													<FormLabel>Unit Plan</FormLabel>
+													<FormControl>
+														<Input
+															type="file"
+															placeholder="Description"
+															{...field}
+														/>
+													</FormControl>
+													<FormMessage />
+												</FormItem>
+											)}
+										/> */}
 										<FormField
 											control={form.control}
 											name="map"
@@ -598,76 +505,13 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 											)}
 										/>
 									</CardContent>
-								</Card> */}
-								{/* <Card>
+								</Card>
+								<Card>
 									<CardHeader>
 										<CardTitle>Unit Plan</CardTitle>
 									</CardHeader>
-									<CardContent>
-										<Card>
-											<CardHeader>
-												<CardTitle>Create</CardTitle>
-											</CardHeader>
-											<CardContent>
-												<FormField
-													control={form.control}
-													name="unitPlan"
-													render={({ field }) => (
-														<FormItem>
-															<div className="mb-4">
-																<FormLabel className="text-base">
-																	Floors
-																</FormLabel>
-																<FormDescription>
-																	Select the minimum one items.
-																</FormDescription>
-															</div>
-															<section className="grid w-full grid-cols-2 gap-3">
-																{fields.map((field, index) => (
-																	<FormField
-																		key={field.id}
-																		control={form.control}
-																		name="unitPlan"
-																		render={({ field }) => {
-																			return (
-																				<FormItem
-																					key={field.id}
-																					className="flex flex-row items-start space-x-3 space-y-0"
-																				>
-																					<FormLabel>Floor No</FormLabel>
-																					<FormControl>
-																						<Input
-																							placeholder="shadcn"
-																							{...field}
-																						/>
-																					</FormControl>
-																					 <FormLabel className="font-normal">
-																						{item.label}
-																					</FormLabel> 
-																				</FormItem>
-																			);
-																		}}
-																	/>
-																))}
-															</section>
-														</FormItem>
-
-														// <FormItem>
-														// 	<FormLabel>Description</FormLabel>
-														// 	<FormControl>
-														// 		<Textarea
-														// 			placeholder="Description"
-														// 			{...field}
-														// 		/>
-														// 	</FormControl>
-														// 	<FormMessage />
-														// </FormItem>
-													)}
-												/>
-											</CardContent>
-										</Card>
-									</CardContent>
-								</Card> */}
+									<CardContent></CardContent>
+								</Card>
 							</section>
 						</CardContent>
 					</form>
@@ -677,4 +521,4 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({
 	);
 };
 
-export default CreateProjectsForm;
+export default EditProject;
