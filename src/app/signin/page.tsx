@@ -61,7 +61,6 @@ export default function SignIn(): JSX.Element {
 				{
 					method: 'post',
 					data: value,
-					withCredentials: true,
 				}
 			);
 
