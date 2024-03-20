@@ -16,20 +16,23 @@ import {
 import { ModeToggle } from './theme-toggle';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { deleteCookie, getCookie } from 'cookies-next';
 
 const Navbar = () => {
 	const router = useRouter();
 
 	const onLogout = async () => {
 		try {
+			deleteCookie('accessToken');
 			const { data } = await axios(
 				`${process.env.NEXT_PUBLIC_API_URL}/users/logout`,
 				{
-					method: 'post',
-					withCredentials: true,
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+					// withCredentials: true,
 				}
 			);
-
 			console.log(data);
 			router.push('/signin');
 		} catch (error) {

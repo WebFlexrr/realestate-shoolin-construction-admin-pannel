@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 'use client';
 import Navbar from '@/components/Navbar';
 import SideBar from '@/components/SideBar';
@@ -7,6 +6,7 @@ import { columns } from './columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { getCookie } from 'cookies-next';
 
 interface Enquiry {
 	id: string;
@@ -18,16 +18,21 @@ interface Enquiry {
 
 const EnquiryPage = () => {
 	const [enquiryData, setEnquiryData] = useState<Enquiry[]>([]);
+	getCookie('accessToken');
+	console.log(getCookie('accessToken'));
 	const fetchEnquiry = async () => {
 		try {
-			const { data } = await axios(
+			const { data } = await axios.get(
 				`${process.env.NEXT_PUBLIC_API_URL}/enquiry/getAllEnquiry`,
 				{
-					method: 'get',
-					withCredentials: true,
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+					// withCredentials: true,
 				}
 			);
 
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			setEnquiryData(data?.data);
 		} catch (error) {
 			console.log(error);

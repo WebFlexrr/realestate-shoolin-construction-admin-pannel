@@ -20,10 +20,10 @@ import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import Image from 'next/image';
-// import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-// import Cookies from 'universal-cookie';
+import Cookies from 'universal-cookie';
+import { useRouter } from 'next/navigation';
 
 const formSchema = z.object({
 	email: z
@@ -44,9 +44,9 @@ type FormDataType = z.infer<typeof formSchema>;
 export default function SignIn(): JSX.Element {
 	// const cookieStore = cookies();
 	// const accessToken = cookieStore.get('accessToken');
-	// const cookies = new Cookies();
+	const cookies = new Cookies();
 
-	// const router = useRouter();
+	const router = useRouter();
 	const form = useForm<FormDataType>({
 		resolver: zodResolver(formSchema),
 	});
@@ -64,13 +64,14 @@ export default function SignIn(): JSX.Element {
 				}
 			);
 
-			// cookies.set('accessToken', data.data.accessToken);
-			// cookies.get('accessToken');
+			cookies.set('accessToken', data.data.accessToken);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			localStorage.setItem('accessToken', data?.data?.accessToken);
 
 			console.log(data);
 			// console.log(cookies.get('accessToken'));
 
-			// router.push('/');
+			router.push('/');
 		} catch (error) {
 			console.log('error', error);
 		}

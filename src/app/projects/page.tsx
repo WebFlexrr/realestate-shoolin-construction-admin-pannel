@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import axios from 'axios';
 import EditProject from './EditProject';
+import { getCookie } from 'cookies-next';
 
 export default function ProjectPage() {
 	const [create, setCreate] = useState<boolean>(false);
@@ -19,11 +20,13 @@ export default function ProjectPage() {
 	>(undefined);
 	const fetchEnquiry = async () => {
 		try {
-			const { data } = await axios(
+			const { data } = await axios.get(
 				`${process.env.NEXT_PUBLIC_API_URL}/projects/getAllProjects`,
 				{
-					method: 'get',
-					withCredentials: true,
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+					// withCredentials: true,
 				}
 			);
 
