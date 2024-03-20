@@ -1,3 +1,4 @@
+'use client';
 import Navbar from '@/components/Navbar';
 import SideBar from '@/components/SideBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,17 +8,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 export default function Home() {
 	return (
 		<main className="relative flex h-full w-full  ">
-			<section className="h-full w-[20%]">
+			<section className="hidden h-full lg:flex lg:w-[20%]">
 				<SideBar />
 			</section>
-			<ScrollArea className="overflow-y-none h-full w-[80%]  ">
+			<ScrollArea className="overflow-y-none h-full w-full lg:w-[80%]  ">
 				<Navbar />
 				<section className="mt-16 flex h-full w-full flex-col pb-10">
 					<section className=" h-auto w-full px-10 pb-5 pt-10">
 						<span className="text-3xl font-semibold">Dashboard</span>
 					</section>
-					<section className="flex h-full w-full flex-col gap-10 px-10 pt-5 ">
-						<section className="grid h-fit w-full grid-cols-4 gap-10">
+					<section className="flex h-full w-full flex-col gap-10 px-5 pt-5 lg:px-10 ">
+						<section className="grid h-fit w-full grid-cols-1 gap-10 lg:grid-cols-4">
 							<Card className="h-fit w-full">
 								<CardHeader>
 									<CardTitle className="flex items-center gap-4 text-2xl">

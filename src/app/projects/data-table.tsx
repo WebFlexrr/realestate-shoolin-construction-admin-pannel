@@ -22,16 +22,16 @@ interface DataTableProps<TData extends Project, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
 	setCreate: Dispatch<SetStateAction<boolean>>;
-	setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
-	setIsEditOpen: Dispatch<SetStateAction<boolean>>;
+	// setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
+	// setIsEditOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function DataTable<TData extends Project, TValue>({
 	columns,
 	data,
 	setCreate,
-	setIsEditableProjectData,
-	setIsEditOpen,
+	// setIsEditableProjectData,
+	// setIsEditOpen,
 }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const table = useReactTable({
@@ -46,7 +46,7 @@ export function DataTable<TData extends Project, TValue>({
 	});
 
 	return (
-		<div className="flex w-full flex-col gap-2">
+		<div className="flex w-full flex-col gap-2 ">
 			<div className="flex w-full items-center gap-5  py-4">
 				<Button
 					onClick={() => {
@@ -89,7 +89,7 @@ export function DataTable<TData extends Project, TValue>({
 				</div>
 			</div>
 
-			<div className="rounded-md border">
+			<div className="  rounded-md  border">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
@@ -131,10 +131,6 @@ export function DataTable<TData extends Project, TValue>({
 														// 	'get Project Datas',
 														// 	cell.getContext().row.original
 														// );
-														setIsEditableProjectData(
-															cell.getContext().row.original
-														);
-														setIsEditOpen(true);
 													}}
 												>
 													{flexRender(

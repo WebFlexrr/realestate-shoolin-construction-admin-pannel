@@ -44,10 +44,10 @@ const EnquiryPage = () => {
 
 	return (
 		<main className="flex h-full w-full">
-			<section className="h-full w-[20%]">
+			<section className="hidden h-full lg:flex lg:w-[20%]">
 				<SideBar />
 			</section>
-			<ScrollArea className="overflow-y-none h-full w-[80%]  ">
+			<ScrollArea className="overflow-y-none h-full w-full  lg:w-[80%]  ">
 				<Navbar />
 				<section className="mt-16 flex h-full w-full flex-col">
 					<section className=" h-auto w-full px-10 pb-5 pt-10">

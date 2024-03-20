@@ -42,7 +42,7 @@ export const columns: Array<ColumnDef<Enquiry>> = [
 		header: 'Email',
 	},
 	{
-		accessorKey: 'message',
-		header: 'Message',
+		accessorKey: 'createdAt',
+		header: 'Date',
 	},
 ];

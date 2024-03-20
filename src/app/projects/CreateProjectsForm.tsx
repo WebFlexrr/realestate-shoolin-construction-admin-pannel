@@ -262,7 +262,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	};
 
 	return (
-		<section className="mx-auto h-full w-full max-w-7xl flex-col py-16 ">
+		<section className="mx-auto h-full w-full max-w-7xl flex-col px-5 py-16 ">
 			<section className="h-fit w-full py-4">
 				<Button
 					onClick={() => {
@@ -277,14 +277,14 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 					<form onSubmit={form.handleSubmit(onSubmit)} id="project">
 						<CardHeader className="w-full ">
 							<CardTitle className="flex w-full justify-between">
-								<section className="flex w-full items-center justify-between ">
+								<section className="flex w-full flex-col justify-between  lg:flex-row lg:items-center ">
 									<span>Create a new Project</span>
-									<section className="flex gap-5 ">
+									<section className="flex flex-col  gap-5 ">
 										<FormField
 											control={form.control}
 											name="isPublished"
 											render={({ field }) => (
-												<FormItem className="flex items-center gap-3">
+												<FormItem className="flex  items-center gap-3">
 													<FormLabel className="text-xl">Publish</FormLabel>
 													<FormControl>
 														<Switch
@@ -303,12 +303,12 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 								</section>
 							</CardTitle>
 						</CardHeader>
-						<CardContent className="grid grid-cols-2 gap-7">
-							<Card>
+						<CardContent className="grid grid-cols-1 gap-7 lg:grid-cols-2">
+							<Card className="col-span-1">
 								<CardHeader>
 									<CardTitle>Project Information</CardTitle>
 								</CardHeader>
-								<CardContent>
+								<CardContent className="space-y-4">
 									<FormField
 										control={form.control}
 										name="name"
@@ -547,14 +547,14 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 									/>
 								</CardContent>
 							</Card>
-							<Card>
+							<Card className="col-span-1">
 								<CardHeader>
 									<CardTitle>Project Contents</CardTitle>
 									<CardDescription>
 										this is a initial Information
 									</CardDescription>
 								</CardHeader>
-								<CardContent>
+								<CardContent className="space-y-4">
 									<FormField
 										control={form.control}
 										name="description"
@@ -675,7 +675,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 									/>
 								</CardContent>
 							</Card>
-							<Card className=" col-span-2">
+							<Card className="col-span-1 lg:col-span-2">
 								<CardHeader className="w-full ">
 									<CardTitle className="flex w-full justify-between">
 										<section className="flex w-full items-center justify-between ">
@@ -696,7 +696,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 											<CardHeader>
 												<CardTitle>Item no {index + 1}</CardTitle>
 											</CardHeader>
-											<CardContent className="grid grid-cols-8 gap-3 p-5">
+											<CardContent className="grid grid-cols-1 gap-3 p-5 lg:grid-cols-8">
 												<FormField
 													control={form.control}
 													name={`unitPlan.${index}.flatName`}

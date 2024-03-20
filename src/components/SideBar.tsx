@@ -15,7 +15,7 @@ const SideBar = (): React.JSX.Element => {
 	const option = pathname.split('/')[1];
 	return (
 		<section className="flex h-full w-full ">
-			<section className="flex h-full w-full flex-col gap-3 px-4 py-6 ">
+			<section className="hidden h-full w-full flex-col gap-3 px-4 py-6 lg:flex ">
 				<section className="flex h-auto w-full justify-center">
 					<Image
 						src={'/logos/logo.png'}
@@ -26,39 +26,41 @@ const SideBar = (): React.JSX.Element => {
 						priority={true}
 					/>
 				</section>
-				<Label className="text-lg font-bold">Menu</Label>
-				<Button
-					variant={option === '' ? 'default' : 'secondary'}
-					onClick={() => {
-						router.push('/');
-					}}
-					className=" flex w-full justify-start"
-				>
-					<Component className="mr-2 h-4 w-4" />
-					<span>Dashboard</span>
-				</Button>
+				<section className=" space-y-3">
+					<Label className="text-lg font-bold">Menu</Label>
+					<Button
+						variant={option === '' ? 'default' : 'secondary'}
+						onClick={() => {
+							router.push('/');
+						}}
+						className=" flex w-full justify-start"
+					>
+						<Component className="mr-2 h-4 w-4" />
+						<span>Dashboard</span>
+					</Button>
 
-				<Button
-					variant={option === 'projects' ? 'default' : 'secondary'}
-					onClick={() => {
-						router.push('/projects');
-					}}
-					className=" flex w-full justify-start"
-				>
-					<Home className="mr-2 h-4 w-4" />
-					<span>Projects</span>
-				</Button>
+					<Button
+						variant={option === 'projects' ? 'default' : 'secondary'}
+						onClick={() => {
+							router.push('/projects');
+						}}
+						className=" flex w-full justify-start"
+					>
+						<Home className="mr-2 h-4 w-4" />
+						<span>Projects</span>
+					</Button>
 
-				<Button
-					variant={option === 'enquiry' ? 'default' : 'secondary'}
-					onClick={() => {
-						router.push('/enquiry');
-					}}
-					className="flex w-full justify-start"
-				>
-					<Phone className="mr-2 h-4 w-4" />
-					<span>Enquiry</span>
-				</Button>
+					<Button
+						variant={option === 'enquiry' ? 'default' : 'secondary'}
+						onClick={() => {
+							router.push('/enquiry');
+						}}
+						className="flex w-full justify-start"
+					>
+						<Phone className="mr-2 h-4 w-4" />
+						<span>Enquiry</span>
+					</Button>
+				</section>
 			</section>
 			<Separator orientation="vertical" />
 		</section>
