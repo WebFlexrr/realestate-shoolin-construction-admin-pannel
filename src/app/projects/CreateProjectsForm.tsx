@@ -21,7 +21,7 @@ import {
 	FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import {
@@ -43,31 +43,33 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import axios from 'axios';
+import { useToast } from '@/components/ui/use-toast';
 
 const amenities = [
 	{
-		id: 'recents',
-		label: 'Recents',
+		id: 'elevator',
+		label: 'Elevator',
 	},
 	{
-		id: 'home',
-		label: 'Home',
+		id: 'security-camera',
+		label: 'Security Camera',
 	},
 	{
-		id: 'applications',
-		label: 'Applications',
+		id: '24/7-power-backup',
+		label: '24/7 Power Backup',
 	},
 	{
-		id: 'desktop',
-		label: 'Desktop',
+		id: '24/7-water-supply',
+		label: '24/7 Water Supply',
 	},
 	{
-		id: 'downloads',
-		label: 'Downloads',
+		id: 'garden',
+		label: 'Garden',
 	},
 	{
-		id: 'documents',
-		label: 'Documents',
+		id: 'swimming-pool',
+		label: 'Swimming Pool',
 	},
 ] as const;
 
@@ -124,24 +126,24 @@ const formSchema = z.object({
 	masterPlan: z.custom<File>((v) => v instanceof File, {
 		message: 'Master plan is required',
 	}),
-	// unitPlan: z
-	// 	.object({
-	// 		floorNo: z.number(),
-	// 		flatType: z
-	// 			.object({
-	// 				flatName: z.string(),
-	// 				image: z.string(),
-	// 				coveredArea: z.string(),
-	// 				stairArea: z.string(),
-	// 				builtUpArea: z.string(),
-	// 				serviceArea: z.string(),
-	// 				totalArea: z.string(),
-	// 				sold: z.boolean(),
-	// 				price: z.string(),
-	// 			})
-	// 			.array(),
-	// 	})
-	// 	.array(),
+	unitPlan: z
+		.object({
+			flatName: z.string(),
+			floorNo: z.string(),
+			image: z
+				.custom<File>((v) => v instanceof File, {
+					message: 'Master plan is required',
+				})
+				.optional(),
+			coveredArea: z.string(),
+			stairArea: z.string(),
+			builtUpArea: z.string(),
+			serviceArea: z.string(),
+			totalArea: z.string(),
+			sold: z.boolean(),
+			price: z.string(),
+		})
+		.array(),
 	map: z.string().url(),
 	address: z.string().trim(),
 	// thumbnail: z.custom<File>((v) => v instanceof File, {
@@ -162,6 +164,7 @@ interface CreateProjectsFormProps {
 }
 
 const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
+	const { toast } = useToast();
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -175,44 +178,87 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 			totalFloors: '',
 			description: '',
 			amenities: [],
-			// unitPlan: [
-			// 	{
-			// 		floorNo: 0,
-			// 		flatType: [
-			// 			{
-			// 				flatName: '',
-			// 				image: '',
-			// 				coveredArea: '',
-			// 				stairArea: '',
-			// 				builtUpArea: '',
-			// 				serviceArea: '',
-			// 				totalArea: '',
-			// 				sold: false,
-			// 				price: '',
-			// 			},
-			// 		],
-			// 	},
-			// ],
+			unitPlan: [
+				{
+					flatName: '',
+					floorNo: '1',
+					coveredArea: '',
+					stairArea: '',
+					builtUpArea: '',
+					serviceArea: '',
+					totalArea: '',
+					sold: false,
+					price: '',
+				},
+			],
 			map: '',
 			address: '',
 			isPublished: false,
 		},
 	});
 
-	// const {
-	// 	fields,
-	// } = useFieldArray({
-	// 	name: 'unitPlan',
-	// 	control,
-	// });
+	const { control } = form;
+
+	const {
+		fields: unitPlanFields,
+		append,
+		remove,
+	} = useFieldArray({
+		name: 'unitPlan',
+		control,
+	});
 
 	const { formState } = form;
 
 	console.log(formState);
+
+	const handleAppend = () => {
+		append({
+			flatName: '',
+			floorNo: '1',
+			coveredArea: '',
+			stairArea: '',
+			builtUpArea: '',
+			serviceArea: '',
+			totalArea: '',
+			sold: false,
+			price: '',
+		});
+	};
+
+	const handleRemove = (index: number) => {
+		remove(index);
+	};
+
 	const onSubmit = async (values: form) => {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
 		console.log('get value', values);
+
+		try {
+			const { data } = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
+				values,
+				{
+					headers: {
+						'Content-Type': 'multipart/form-data',
+					},
+					withCredentials: true,
+				}
+			);
+
+			console.log(data);
+			toast({
+				title: 'Form Successfull Uploaded',
+				description: 'Form Successfull Uploaded',
+			});
+		} catch (error) {
+			console.log(error);
+			// toast({
+			// 	title: 'Form Successfull Uploaded',
+			// 	description: 'Form Successfull Uploaded',
+			// });
+		}
 	};
 
 	return (
@@ -246,7 +292,6 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 															onCheckedChange={field.onChange}
 														/>
 													</FormControl>
-
 													<FormMessage />
 												</FormItem>
 											)}
@@ -630,73 +675,221 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 									/>
 								</CardContent>
 							</Card>
-							<Card>
-								<CardHeader>
-									<CardTitle>Unit Plan</CardTitle>
+							<Card className=" col-span-2">
+								<CardHeader className="w-full ">
+									<CardTitle className="flex w-full justify-between">
+										<section className="flex w-full items-center justify-between ">
+											<span>Unit Plan</span>
+											<Button
+												onClick={() => {
+													handleAppend();
+												}}
+											>
+												Create
+											</Button>
+										</section>
+									</CardTitle>
 								</CardHeader>
-								<CardContent>
-									{/* <Card>
-										<CardHeader>
-											<CardTitle>Create</CardTitle>
-										</CardHeader>
-										<CardContent>
-											<FormField
-												control={form.control}
-												name="unitPlan"
-												render={({ field }) => (
-													<FormItem>
-														<div className="mb-4">
-															<FormLabel className="text-base">
-																Floors
-															</FormLabel>
-															<FormDescription>
-																Select the minimum one items.
-															</FormDescription>
-														</div>
-														<section className="grid w-full grid-cols-2 gap-3">
-															{fields.map((field, index) => (
-																<FormField
-																	key={field.id}
-																	control={form.control}
-																	name="unitPlan"
-																	render={({ field }) => {
-																		return (
-																			<FormItem
-																				key={field.id}
-																				className="flex flex-row items-start space-x-3 space-y-0"
-																			>
-																				<FormLabel>Floor No</FormLabel>
-																				<FormControl>
-																					<Input
-																						placeholder="shadcn"
-																						{...field}
-																					/>
-																				</FormControl>
-																				<FormLabel className="font-normal">
-																					{item.label}
-																				</FormLabel>
-																			</FormItem>
-																		);
+								<CardContent className=" space-y-4">
+									{unitPlanFields.map((field, index) => (
+										<Card key={field.id}>
+											<CardHeader>
+												<CardTitle>Item no {index + 1}</CardTitle>
+											</CardHeader>
+											<CardContent className="grid grid-cols-8 gap-3 p-5">
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.flatName`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Flat Name</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the floor name"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.floorNo`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>floor number</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the floor number"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.image`}
+													render={({
+														field: { ref, name, onBlur, onChange },
+													}) => (
+														<FormItem>
+															<FormLabel>Image</FormLabel>
+															<FormControl>
+																<Input
+																	type="file"
+																	placeholder="Enter the Brochure"
+																	// {...field}
+																	ref={ref}
+																	name={name}
+																	onBlur={onBlur}
+																	onChange={(e) => {
+																		onChange(e.target.files?.[0]);
 																	}}
 																/>
-															))}
-														</section>
-													</FormItem>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
 
-													// <FormItem>
-													// 	<FormLabel>Description</FormLabel>
-													// 	<FormControl>
-													// 		<Textarea
-													// 			placeholder="Description"
-													// 			{...field}
-													// 		/>
-													// 	</FormControl>
-													// 	<FormMessage />
-													// </FormItem>
-												)}
-											/>
-										</CardContent>
-									</Card> */}
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.coveredArea`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Covered Area</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the Covered Area"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.stairArea`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Stair Area</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the Stair Area"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.builtUpArea`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Built Up Area</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the Built Up Area"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.serviceArea`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Service Area</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter the Service Area"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.totalArea`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Total Area</FormLabel>
+															<FormControl>
+																<Input
+																	placeholder="Enter Total Area"
+																	{...field}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.sold`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>is Sold</FormLabel>
+															<FormControl>
+																<Switch
+																	checked={field.value}
+																	onCheckedChange={field.onChange}
+																/>
+																{/* <Select
+																	onValueChange={field.onChange}
+																	defaultValue={field.value}
+																>
+																	<FormControl>
+																		<SelectTrigger>
+																			<SelectValue placeholder="Select the Status of the Project" />
+																		</SelectTrigger>
+																	</FormControl>
+																	<SelectContent>
+																		<SelectItem value={'false'}>
+																			False
+																		</SelectItem>
+																		<SelectItem value={'true'}>true</SelectItem>
+																	</SelectContent>
+																</Select> */}
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.price`}
+													render={({ field }) => (
+														<FormItem>
+															<FormLabel>Price</FormLabel>
+															<FormControl>
+																<Input placeholder="Enter Price" {...field} />
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+												<Button
+													onClick={() => {
+														handleRemove(index);
+													}}
+												>
+													remove
+												</Button>
+											</CardContent>
+										</Card>
+									))}
 								</CardContent>
 							</Card>
 						</CardContent>
