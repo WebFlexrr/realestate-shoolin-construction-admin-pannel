@@ -23,7 +23,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import Cookies from 'universal-cookie';
+// import Cookies from 'universal-cookie';
 
 const formSchema = z.object({
 	email: z
@@ -44,7 +44,7 @@ type FormDataType = z.infer<typeof formSchema>;
 export default function SignIn(): JSX.Element {
 	// const cookieStore = cookies();
 	// const accessToken = cookieStore.get('accessToken');
-	const cookies = new Cookies();
+	// const cookies = new Cookies();
 
 	const router = useRouter();
 	const form = useForm<FormDataType>({
@@ -65,11 +65,11 @@ export default function SignIn(): JSX.Element {
 				}
 			);
 
-			cookies.set('accessToken', data.data.accessToken);
-			cookies.get('accessToken');
+			// cookies.set('accessToken', data.data.accessToken);
+			// cookies.get('accessToken');
 
 			console.log(data);
-			console.log(cookies.get('accessToken'));
+			// console.log(cookies.get('accessToken'));
 
 			router.push('/');
 		} catch (error) {
