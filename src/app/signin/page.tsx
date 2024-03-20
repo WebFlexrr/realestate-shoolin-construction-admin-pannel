@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 // import Cookies from 'universal-cookie';
@@ -46,7 +46,7 @@ export default function SignIn(): JSX.Element {
 	// const accessToken = cookieStore.get('accessToken');
 	// const cookies = new Cookies();
 
-	const router = useRouter();
+	// const router = useRouter();
 	const form = useForm<FormDataType>({
 		resolver: zodResolver(formSchema),
 	});
@@ -70,7 +70,7 @@ export default function SignIn(): JSX.Element {
 			console.log(data);
 			// console.log(cookies.get('accessToken'));
 
-			router.push('/');
+			// router.push('/');
 		} catch (error) {
 			console.log('error', error);
 		}
