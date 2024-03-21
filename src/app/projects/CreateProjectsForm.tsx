@@ -45,6 +45,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
 import { useToast } from '@/components/ui/use-toast';
+import { ToastAction } from '@/components/ui/toast';
+import { getCookie } from 'cookies-next';
 
 const amenities = [
 	{
@@ -101,9 +103,13 @@ const formSchema = z.object({
 	price: z.string(),
 	propertyType: z.string(),
 	status: z.string(),
-	brochure: z.custom<File>((v) => v instanceof File, {
-		message: 'Brochure is required',
-	}),
+	brochure: z
+		.custom<File>((v) => v instanceof File, {
+			message: 'Brochure is required',
+		})
+		.refine((value) => value.type === 'application/pdf', {
+			message: 'You can enter only pdf.',
+		}),
 	apartmentType: z
 		.string()
 		.array()
@@ -147,14 +153,14 @@ const formSchema = z.object({
 		.optional(),
 	map: z.string().url(),
 	address: z.string().trim(),
-	// thumbnail: z.custom<File>((v) => v instanceof File, {
-	// 	message: 'thumbnail is required',
-	// }),
-	// coverImages: z
-	// 	.custom<File>((v) => v instanceof File, {
-	// 		message: 'coverImages is required',
-	// 	})
-	// 	.array(),
+	thumbnail: z.custom<File>((v) => v instanceof File, {
+		message: 'thumbnail is required',
+	}),
+	coverImages: z
+		.custom<File>((v) => v instanceof File, {
+			message: 'coverImages is required',
+		})
+		.array(),
 	isPublished: z.boolean().default(false).optional(),
 });
 
@@ -179,19 +185,19 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 			totalFloors: '',
 			description: '',
 			amenities: [],
-			unitPlan: [
-				{
-					flatName: '',
-					floorNo: '1',
-					coveredArea: '',
-					stairArea: '',
-					builtUpArea: '',
-					serviceArea: '',
-					totalArea: '',
-					sold: false,
-					price: '',
-				},
-			],
+			// unitPlan: [
+			// 	{
+			// 		flatName: '',
+			// 		floorNo: '1',
+			// 		coveredArea: '',
+			// 		stairArea: '',
+			// 		builtUpArea: '',
+			// 		serviceArea: '',
+			// 		totalArea: '',
+			// 		sold: false,
+			// 		price: '',
+			// 	},
+			// ],
 			map: '',
 			address: '',
 			isPublished: false,
@@ -231,7 +237,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 		remove(index);
 	};
 
-	const uploadToS3 = async (file: File) => {
+	const uploadSingleFileToS3 = async (file: File) => {
 		console.log('file', file);
 
 		try {
@@ -243,9 +249,8 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 			);
 
 			const { uploadUrl, url, key } = data.data;
-			console.log(data.data);
 
-			const responce = await axios.put(
+			await axios.put(
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 				uploadUrl,
 				file
@@ -253,33 +258,88 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 
 			console.log(url);
 			console.log(key);
-			console.log('respobce', responce);
+			toast({
+				title: 'File Uploaded',
+				description: 'There was a problem with your request.',
+				action: <ToastAction altText="Try again">Try again</ToastAction>,
+			});
 			return url;
 		} catch (error) {
+			toast({
+				variant: 'destructive',
+				title: 'Uh oh! Something went wrong. File Not uploaded',
+				description: 'There was a problem with your request.',
+				action: <ToastAction altText="Try again">Try again</ToastAction>,
+			});
+
 			console.log(error);
 		}
 	};
 
+	// const uploadMultipleFileToS3 = async (files: File[]) => {
+	// 	console.log('Files', files);
+
+	// 	const requests = files.map(async (file) =>
+	// 		await axios.post(
+	// 			`${process.env.NEXT_PUBLIC_API_URL}/projects/generateUploadUrl`,
+	// 			{
+	// 				fileType: file.type,
+	// 			}
+	// 		)
+	// 	);
+
+	// 	axios
+	// 		.all(requests)
+	// 		.then((data) => console.log(data))
+	// 		.catch((error) => console.log(error));
+
+	// 	return files;
+	// };
+
 	const onSubmit = async (values: form) => {
-		// Do something with the form values.
-		// ✅ This will be type-safe and validated.
-		console.log('get value', values);
+		// console.log('get value', values);
 
 		// eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
 		try {
-			const urlData = await uploadToS3(values.brochure);
+			const brochureUrlData: string = await uploadSingleFileToS3(
+				values.brochure
+			);
+			const masterPlanUrlData: string = await uploadSingleFileToS3(
+				values.masterPlan
+			);
+			const thumbnailUrlData: string = await uploadSingleFileToS3(
+				values.thumbnail
+			);
 
-			console.log('urlData', urlData);
-			// const { data } = await axios.post(
-			// 	`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
-			// 	values,
-			// 	{
-			// 		headers: {
-			// 			'Content-Type': 'multipart/form-data',
-			// 		},
-			// 		withCredentials: true,
-			// 	}
-			// );
+			const coverImages = await uploadSingleFileToS3(values.coverImages[0]);
+
+			console.log('brochureUrlData', brochureUrlData);
+			console.log('masterPlanUrlData', masterPlanUrlData);
+			console.log('thumbnailUrlData', thumbnailUrlData);
+			console.log(' coverImages', coverImages);
+
+			const updatedFormData = {
+				...values,
+				brochure: brochureUrlData,
+				masterPlan: masterPlanUrlData,
+
+				thumbnail: thumbnailUrlData,
+				coverImages: [coverImages],
+			};
+			console.log(updatedFormData);
+
+			const { data } = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
+				updatedFormData,
+				{
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+					// withCredentials: true,
+				}
+			);
+
+			console.log('Create project Responce---------------> ', data);
 
 			// console.log(data);
 			toast({
@@ -701,6 +761,59 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 													<Textarea
 														placeholder="Give the map link"
 														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</CardContent>
+							</Card>
+							<Card className="col-span-1 lg:col-span-2">
+								<CardHeader>
+									<CardTitle>Image Upload</CardTitle>
+								</CardHeader>
+								<CardContent className="grid grid-cols-1 gap-7 lg:grid-cols-2">
+									<FormField
+										control={form.control}
+										name="thumbnail"
+										render={({ field: { ref, name, onBlur, onChange } }) => (
+											<FormItem>
+												<FormLabel>Thumbnail</FormLabel>
+												<FormControl>
+													<Input
+														type="file"
+														ref={ref}
+														name={name}
+														onBlur={onBlur}
+														onChange={(e) => {
+															onChange(e.target.files?.[0]);
+														}}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="coverImages"
+										render={({ field: { ref, name, onBlur, onChange } }) => (
+											<FormItem>
+												<FormLabel>Cover Images</FormLabel>
+												<FormControl>
+													<Input
+														type="file"
+														ref={ref}
+														name={name}
+														onBlur={onBlur}
+														onChange={(e) => {
+															// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+															onChange(Object.values(e.target.files!));
+														}}
+														placeholder="Master Plan"
+														multiple
+														// {...field}
 													/>
 												</FormControl>
 												<FormMessage />
