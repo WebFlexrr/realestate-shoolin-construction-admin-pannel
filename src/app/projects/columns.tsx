@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { type ColumnDef } from '@tanstack/react-table';
+import Link from 'next/link';
 
 export const projectColumns: Array<ColumnDef<Project>> = [
 	{
@@ -39,10 +40,10 @@ export const projectColumns: Array<ColumnDef<Project>> = [
 		header: 'Id',
 	},
 
-	{
-		accessorKey: 'tags',
-		header: 'Tags',
-	},
+	// {
+	// 	accessorKey: 'tags',
+	// 	header: 'Tags',
+	// },
 	{
 		accessorKey: 'isPublished',
 		header: 'isPublished',
@@ -53,9 +54,9 @@ export const projectColumns: Array<ColumnDef<Project>> = [
 		cell: ({ row }) => {
 			// console.log(row.original._id);
 			return (
-				// <Link href={`/projects/edit/${row.original._id}`}>
-				<Button>Edit</Button>
-				// </Link>
+				<Link href={`/projects/${row.original._id}`}>
+					<Button>Edit</Button>
+				</Link>
 			);
 		},
 		enableSorting: false,

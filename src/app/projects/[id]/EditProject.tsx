@@ -8,7 +8,7 @@ import {
 	CardTitle,
 } from '@/components/ui/card';
 import { ArrowLeft, CalendarIcon } from 'lucide-react';
-import React, { type FC, type Dispatch, type SetStateAction } from 'react';
+import React, { type FC } from 'react';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
@@ -32,7 +32,6 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -44,9 +43,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
-import { useToast } from '@/components/ui/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { getCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/use-toast';
 
 const amenities = [
 	{
@@ -138,7 +138,7 @@ const formSchema = z.object({
 			floorNo: z.string(),
 			image: z
 				.custom<File>((v) => v instanceof File, {
-					message: 'Master plan is required',
+					message: 'Image is required',
 				})
 				.optional(),
 			coveredArea: z.string(),
@@ -160,6 +160,7 @@ const formSchema = z.object({
 		.custom<File>((v) => v instanceof File, {
 			message: 'coverImages is required',
 		})
+
 		.array(),
 	isPublished: z.boolean().default(false).optional(),
 });
@@ -167,41 +168,16 @@ const formSchema = z.object({
 type form = z.infer<typeof formSchema>;
 
 interface CreateProjectsFormProps {
-	setCreate: Dispatch<SetStateAction<boolean>>;
+	fetchedProjectData: Project;
 }
 
-const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
+const EditProject: FC<CreateProjectsFormProps> = ({ fetchedProjectData }) => {
+	const router = useRouter();
 	const { toast } = useToast();
+	console.log('fertch213131---->', fetchedProjectData);
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
-		defaultValues: {
-			name: '',
-			price: '',
-			propertyType: 'residential',
-			status: 'not-started',
-			apartmentType: [],
-			totalUnits: '',
-			possessionDate: new Date(),
-			totalFloors: '',
-			description: '',
-			amenities: [],
-			// unitPlan: [
-			// 	{
-			// 		flatName: '',
-			// 		floorNo: '1',
-			// 		coveredArea: '',
-			// 		stairArea: '',
-			// 		builtUpArea: '',
-			// 		serviceArea: '',
-			// 		totalArea: '',
-			// 		sold: false,
-			// 		price: '',
-			// 	},
-			// ],
-			map: '',
-			address: '',
-			isPublished: false,
-		},
+		defaultValues: fetchedProjectData,
 	});
 
 	const { control } = form;
@@ -356,11 +332,11 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	};
 
 	return (
-		<section className="mx-auto h-full w-full max-w-7xl flex-col  py-16 ">
-			<section className="h-fit w-full px-5 py-4">
+		<section className="mx-auto h-full w-full max-w-7xl flex-col px-5 py-16 ">
+			<section className="h-fit w-full py-4">
 				<Button
 					onClick={() => {
-						setCreate(false);
+						router.push('/projects');
 					}}
 				>
 					<ArrowLeft /> Back
@@ -372,7 +348,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 						<CardHeader className="w-full ">
 							<CardTitle className="flex w-full justify-between">
 								<section className="flex w-full flex-col justify-between  lg:flex-row lg:items-center ">
-									<span>Create a new Project</span>
+									<span>Edit Panel</span>
 									<section className="flex flex-col gap-5 lg:flex-row ">
 										<FormField
 											control={form.control}
@@ -1048,4 +1024,4 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	);
 };
 
-export default CreateProjectsForm;
+export default EditProject;

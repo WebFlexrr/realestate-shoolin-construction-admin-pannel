@@ -2,23 +2,13 @@
 import React from 'react';
 import { Separator } from './ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import {
-	Component,
-	CreditCard,
-	Home,
-	LogOut,
-	Phone,
-	Settings,
-	User,
-} from 'lucide-react';
+import { Component, Home, LogOut, Menu, Phone } from 'lucide-react';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
-	DropdownMenuShortcut,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ModeToggle } from './theme-toggle';
@@ -67,7 +57,7 @@ const Navbar = () => {
 					<Drawer>
 						<DrawerTrigger>
 							<div className="disabled:opacity-50h-10 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none  ">
-								Open
+								<Menu />
 							</div>
 						</DrawerTrigger>
 						<DrawerContent>
@@ -129,10 +119,10 @@ const Navbar = () => {
 							</Avatar>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="text-xl">
-							<DropdownMenuLabel>My Account</DropdownMenuLabel>
-							<DropdownMenuSeparator />
+							{/* <DropdownMenuLabel>My Account</DropdownMenuLabel>
+							<DropdownMenuSeparator /> */}
 							<DropdownMenuGroup>
-								<DropdownMenuItem>
+								{/* <DropdownMenuItem>
 									<User className="mr-2 h-4 w-4" />
 									<span>My Profile</span>
 									<DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
@@ -146,7 +136,7 @@ const Navbar = () => {
 									<Settings className="mr-2 h-4 w-4" />
 									<span>Account Settings</span>
 									<DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-								</DropdownMenuItem>
+								</DropdownMenuItem> */}
 							</DropdownMenuGroup>
 							<DropdownMenuSeparator />
 

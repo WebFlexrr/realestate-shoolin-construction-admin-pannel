@@ -7,40 +7,42 @@ interface Enquiry {
 }
 
 interface Project {
-	_id: string;
+	_id?: string;
 	name: string;
 	price: string;
-	tags: string[];
-	brochure: string;
-	apartmentType: string;
+	propertyType: string;
+	status: string;
+	brochure?: File;
+	apartmentType: string[];
 	totalUnits: string;
 	possessionDate: Date;
 	totalFloors: string;
 	description: string;
 	amenities: string[];
-	masterPlan: string;
-	unitPlan: Array<{
+	masterPlan?: File;
+	unitPlan?: Array<{
 		_id: string;
-		floorNo: number;
-		flatType: Array<{
-			_id: string;
-			flatName: string;
-			image: string;
-			coveredArea: string;
-			stairArea: string;
-			builtUpArea: string;
-			serviceArea: string;
-			totalArea: string;
-			price: string;
-		}>;
+		flatName: string;
+		floorNo: string;
+		image?: File;
+		coveredArea: string;
+		stairArea: string;
+		builtUpArea: string;
+		serviceArea: string;
+		totalArea: string;
+		sold: boolean;
+		price: string;
 	}>;
-	constructionStatus: string[];
+	constructionStatus?: Array<{
+		time: Date;
+		image: string;
+	}>;
 	map: string;
 	address: string;
-	thumbnail: string;
-	coverImages: string[];
+	thumbnail?: File;
+	coverImages?: File[];
 	isPublished: boolean;
-	createdAt: string;
-	updatedAt: string;
-	__v: number;
+	createdAt?: string;
+	updatedAt?: string;
+	__v?: number;
 }

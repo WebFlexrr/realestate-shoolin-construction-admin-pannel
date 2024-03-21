@@ -123,23 +123,24 @@ export function DataTable<TData extends Project, TValue>({
 										// 	// cell.column.columnDef.cell
 										// 	// cell.getContext().row.original
 										// );
-										return cell.id === '0_edit' ? (
-											<TableCell key={cell.id} className="truncate text-base">
-												<button
-													onClick={() => {
-														// console.log(
-														// 	'get Project Datas',
-														// 	cell.getContext().row.original
-														// );
-													}}
-												>
-													{flexRender(
-														cell.column.columnDef.cell,
-														cell.getContext()
-													)}
-												</button>
-											</TableCell>
-										) : (
+										// return cell.id === '0_edit' ? (
+										// 	<TableCell key={cell.id} className="truncate text-base">
+										// 		<button
+										// 			onClick={() => {
+										// 				// console.log(
+										// 				// 	'get Project Datas',
+										// 				// 	cell.getContext().row.original
+										// 				// );
+										// 			}}
+										// 		>
+										// 			{flexRender(
+										// 				cell.column.columnDef.cell,
+										// 				cell.getContext()
+										// 			)}
+										// 		</button>
+										// 	</TableCell>
+										// ) : (
+										return (
 											<TableCell key={cell.id} className="truncate text-base">
 												{flexRender(
 													cell.column.columnDef.cell,
@@ -147,6 +148,7 @@ export function DataTable<TData extends Project, TValue>({
 												)}
 											</TableCell>
 										);
+										// );
 									})}
 								</TableRow>
 							))
