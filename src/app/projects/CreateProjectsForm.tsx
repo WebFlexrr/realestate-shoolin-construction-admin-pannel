@@ -143,7 +143,8 @@ const formSchema = z.object({
 			sold: z.boolean(),
 			price: z.string(),
 		})
-		.array(),
+		.array()
+		.optional(),
 	map: z.string().url(),
 	address: z.string().trim(),
 	// thumbnail: z.custom<File>((v) => v instanceof File, {
@@ -230,24 +231,57 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 		remove(index);
 	};
 
+	const uploadToS3 = async (file: File) => {
+		console.log('file', file);
+
+		try {
+			const { data } = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/projects/generateUploadUrl`,
+				{
+					fileType: file.type,
+				}
+			);
+
+			const { uploadUrl, url, key } = data.data;
+			console.log(data.data);
+
+			const responce = await axios.put(
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+				uploadUrl,
+				file
+			);
+
+			console.log(url);
+			console.log(key);
+			console.log('respobce', responce);
+			return url;
+		} catch (error) {
+			console.log(error);
+		}
+	};
+
 	const onSubmit = async (values: form) => {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
 		console.log('get value', values);
 
+		// eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
 		try {
-			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
-				values,
-				{
-					headers: {
-						'Content-Type': 'multipart/form-data',
-					},
-					withCredentials: true,
-				}
-			);
+			const urlData = await uploadToS3(values.brochure);
 
-			console.log(data);
+			console.log('urlData', urlData);
+			// const { data } = await axios.post(
+			// 	`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
+			// 	values,
+			// 	{
+			// 		headers: {
+			// 			'Content-Type': 'multipart/form-data',
+			// 		},
+			// 		withCredentials: true,
+			// 	}
+			// );
+
+			// console.log(data);
 			toast({
 				title: 'Form Successfull Uploaded',
 				description: 'Form Successfull Uploaded',
