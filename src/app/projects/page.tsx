@@ -38,8 +38,6 @@ export default function ProjectPage() {
 		void fetchEnquiry();
 	}, []);
 
-	// console.log(isEditableProjectData);
-
 	return (
 		<main className="flex h-full w-full">
 			<section className="hidden h-full w-full lg:flex lg:w-[20%]">
@@ -48,14 +46,6 @@ export default function ProjectPage() {
 			<ScrollArea className="overflow-y-none relative h-full  w-full lg:w-[80%]">
 				<Navbar />
 
-				{/* {isEditOpen ? (
-					<EditProject
-						isEditableProjectData={isEditableProjectData}
-						setIsEditableProjectData={setIsEditableProjectData}
-						setIsEditOpen={setIsEditOpen}
-					/>
-				) :
-			*/}
 				{create ? (
 					<CreateProjectsForm setCreate={setCreate} />
 				) : (
@@ -64,14 +54,11 @@ export default function ProjectPage() {
 							<span className="text-3xl font-semibold">Projects</span>
 						</section>
 						<section className="mx-auto flex h-full   w-screen  px-3 lg:w-full ">
-							{/* <section className="h-full w-[70%] border border-black"></section> */}
 							<section className="mx-auto flex h-full w-full max-w-7xl flex-col ">
 								<DataTable
 									columns={projectColumns}
 									data={projectData}
 									setCreate={setCreate}
-									// setIsEditableProjectData={setIsEditableProjectData}
-									// setIsEditOpen={setIsEditOpen}
 								/>
 							</section>
 						</section>

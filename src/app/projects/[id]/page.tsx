@@ -13,21 +13,7 @@ import { getCookie } from 'cookies-next';
 const ProjectPage = ({ params }: { params: { id: string } }) => {
 	const id = params.id;
 
-	const [fetchedProjectData, setFetchedProjectData] = useState<Project>({
-		name: '',
-		price: '',
-		propertyType: 'residential',
-		status: 'not-started',
-		apartmentType: [],
-		totalUnits: '',
-		possessionDate: new Date(),
-		totalFloors: '',
-		description: '',
-		amenities: [],
-		map: '',
-		address: '',
-		isPublished: false,
-	});
+	const [fetchedProjectData, setFetchedProjectData] = useState<Project>();
 	const { toast } = useToast();
 
 	const fetchProjectData = async () => {
@@ -45,10 +31,10 @@ const ProjectPage = ({ params }: { params: { id: string } }) => {
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			const projectData: Project = data.data;
 
-			delete projectData.brochure;
-			delete projectData.masterPlan;
-			delete projectData.thumbnail;
-			delete projectData.coverImages;
+			// delete projectData.brochure;
+			// delete projectData.masterPlan;
+			// delete projectData.thumbnail;
+			// delete projectData.coverImages;
 
 			setFetchedProjectData(projectData);
 		} catch (error) {
@@ -75,7 +61,7 @@ const ProjectPage = ({ params }: { params: { id: string } }) => {
 			</section>
 			<ScrollArea className="overflow-y-none relative h-full  w-full lg:w-[80%]">
 				<Navbar />
-				<EditProject fetchedProjectData={fetchedProjectData} />
+				<EditProject fetchedProjectData={fetchedProjectData} id={id} />
 			</ScrollArea>
 		</main>
 	);

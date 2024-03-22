@@ -346,8 +346,14 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 				title: 'Form Successfull Uploaded',
 				description: 'Form Successfull Uploaded',
 			});
-		} catch (error) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: any) {
 			console.log(error);
+			toast({
+				variant: 'destructive',
+				title: 'Error happened',
+				description: error.response.message,
+			});
 			// toast({
 			// 	title: 'Form Successfull Uploaded',
 			// 	description: 'Form Successfull Uploaded',

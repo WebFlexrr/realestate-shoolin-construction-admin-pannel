@@ -4,8 +4,55 @@ import SideBar from '@/components/SideBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Headset, HomeIcon, User } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { getCookie } from 'cookies-next';
 
 export default function Home() {
+	const [projectData, setProjectData] = useState<Project[]>([]);
+	const [enquiryData, setEnquiryData] = useState<Project[]>([]);
+	const getAllProjects = async () => {
+		try {
+			const { data } = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/projects/getAllProjects`,
+				{
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+				}
+			);
+
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			setProjectData(data?.data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	const fetchEnquiry = async () => {
+		try {
+			const { data } = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/enquiry/getAllEnquiry`,
+				{
+					headers: {
+						Authorization: ` Bearer ${getCookie('accessToken')}`,
+					},
+				}
+			);
+
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			setEnquiryData(data?.data);
+		} catch (error) {
+			console.log(error);
+		}
+	};
+	useEffect(() => {
+		void fetchEnquiry();
+		void getAllProjects();
+		return () => {
+			void fetchEnquiry();
+			void getAllProjects();
+		};
+	}, []);
 	return (
 		<main className="relative flex h-full w-full  ">
 			<section className="hidden h-full lg:flex lg:w-[20%]">
@@ -29,7 +76,7 @@ export default function Home() {
 
 								<CardContent className=" ">
 									<div className="flex  h-full w-full items-center justify-center text-4xl font-bold">
-										50
+										{projectData.length}
 									</div>
 								</CardContent>
 							</Card>
@@ -59,7 +106,7 @@ export default function Home() {
 
 								<CardContent className=" ">
 									<div className="flex  h-full w-full items-center justify-center text-4xl font-bold">
-										20
+										{enquiryData.length}
 									</div>
 								</CardContent>
 							</Card>

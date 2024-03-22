@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 import {
 	Card,
@@ -44,7 +45,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
 import { ToastAction } from '@/components/ui/toast';
-import { getCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -109,7 +109,8 @@ const formSchema = z.object({
 		})
 		.refine((value) => value.type === 'application/pdf', {
 			message: 'You can enter only pdf.',
-		}),
+		})
+		.or(z.string()),
 	apartmentType: z
 		.string()
 		.array()
@@ -120,6 +121,7 @@ const formSchema = z.object({
 	possessionDate: z.date({
 		required_error: 'A date of birth is required.',
 	}),
+	// .or(z.string().datetime())
 	totalFloors: z.string(),
 	description: z.string().trim(),
 	amenities: z
@@ -129,9 +131,11 @@ const formSchema = z.object({
 			message: 'You have to select at least one item.',
 		}),
 
-	masterPlan: z.custom<File>((v) => v instanceof File, {
-		message: 'Master plan is required',
-	}),
+	masterPlan: z
+		.custom<File>((v) => v instanceof File, {
+			message: 'Master plan is required',
+		})
+		.or(z.string()),
 	unitPlan: z
 		.object({
 			flatName: z.string(),
@@ -140,6 +144,7 @@ const formSchema = z.object({
 				.custom<File>((v) => v instanceof File, {
 					message: 'Image is required',
 				})
+				.or(z.string())
 				.optional(),
 			coveredArea: z.string(),
 			stairArea: z.string(),
@@ -153,13 +158,16 @@ const formSchema = z.object({
 		.optional(),
 	map: z.string().url(),
 	address: z.string().trim(),
-	thumbnail: z.custom<File>((v) => v instanceof File, {
-		message: 'thumbnail is required',
-	}),
+	thumbnail: z
+		.custom<File>((v) => v instanceof File, {
+			message: 'thumbnail is required',
+		})
+		.or(z.string()),
 	coverImages: z
 		.custom<File>((v) => v instanceof File, {
 			message: 'coverImages is required',
 		})
+		.or(z.string())
 
 		.array(),
 	isPublished: z.boolean().default(false).optional(),
@@ -168,19 +176,23 @@ const formSchema = z.object({
 type form = z.infer<typeof formSchema>;
 
 interface CreateProjectsFormProps {
-	fetchedProjectData: Project;
+	fetchedProjectData: Project | undefined;
+	id: string;
 }
 
-const EditProject: FC<CreateProjectsFormProps> = ({ fetchedProjectData }) => {
+const EditProject: FC<CreateProjectsFormProps> = ({
+	fetchedProjectData,
+	id,
+}) => {
 	const router = useRouter();
 	const { toast } = useToast();
 	console.log('fertch213131---->', fetchedProjectData);
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
-		defaultValues: fetchedProjectData,
+		values: fetchedProjectData,
 	});
 
-	const { control } = form;
+	const { control, watch } = form;
 
 	const {
 		fields: unitPlanFields,
@@ -191,9 +203,9 @@ const EditProject: FC<CreateProjectsFormProps> = ({ fetchedProjectData }) => {
 		control,
 	});
 
-	const { formState } = form;
+	// const { formState } = form;
 
-	console.log(formState);
+	console.log('watch', watch('thumbnail'));
 
 	const handleAppend = () => {
 		append({
@@ -273,62 +285,66 @@ const EditProject: FC<CreateProjectsFormProps> = ({ fetchedProjectData }) => {
 	// };
 
 	const onSubmit = async (values: form) => {
-		// console.log('get value', values);
+		console.log('get value', values);
 
 		// eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
-		try {
-			const brochureUrlData: string = await uploadSingleFileToS3(
-				values.brochure
-			);
-			const masterPlanUrlData: string = await uploadSingleFileToS3(
-				values.masterPlan
-			);
-			const thumbnailUrlData: string = await uploadSingleFileToS3(
-				values.thumbnail
-			);
+		// try {
 
-			const coverImages = await uploadSingleFileToS3(values.coverImages[0]);
+		// 	const brochureUrlData: string = await uploadSingleFileToS3(
+		// 		values.brochure
+		// 	);
+		// 	const masterPlanUrlData: string = await uploadSingleFileToS3(
+		// 		values.masterPlan
+		// 	);
+		// 	const thumbnailUrlData: string = await uploadSingleFileToS3(
+		// 		values.thumbnail
+		// 	);
 
-			console.log('brochureUrlData', brochureUrlData);
-			console.log('masterPlanUrlData', masterPlanUrlData);
-			console.log('thumbnailUrlData', thumbnailUrlData);
-			console.log(' coverImages', coverImages);
+		// 	const coverImages = await uploadSingleFileToS3(values.coverImages[0]);
 
-			const updatedFormData = {
-				...values,
-				brochure: brochureUrlData,
-				masterPlan: masterPlanUrlData,
+		// 	console.log('brochureUrlData', brochureUrlData);
+		// 	console.log('masterPlanUrlData', masterPlanUrlData);
+		// 	console.log('thumbnailUrlData', thumbnailUrlData);
+		// 	console.log(' coverImages', coverImages);
 
-				thumbnail: thumbnailUrlData,
-				coverImages: [coverImages],
-			};
-			console.log(updatedFormData);
+		// 	const updatedFormData = {
+		// 		...values,
+		// 		brochure: brochureUrlData,
+		// 		masterPlan: masterPlanUrlData,
 
-			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
-				updatedFormData,
-				{
-					headers: {
-						Authorization: ` Bearer ${getCookie('accessToken')}`,
-					},
-					// withCredentials: true,
-				}
-			);
+		// 		thumbnail: thumbnailUrlData,
+		// 		coverImages: [coverImages],
+		// 	};
+		// 	console.log(updatedFormData);
 
-			console.log('Create project Responce---------------> ', data);
+		// 	const { data } = await axios.post(
+		// 		`${process.env.NEXT_PUBLIC_API_URL}/projects/editProject`,
+		// 		{
+		// 			id,
+		// 			...updatedFormData,
+		// 		},
+		// 		{
+		// 			headers: {
+		// 				Authorization: ` Bearer ${getCookie('accessToken')}`,
+		// 			},
+		// 			// withCredentials: true,
+		// 		}
+		// 	);
 
-			// console.log(data);
-			toast({
-				title: 'Form Successfull Uploaded',
-				description: 'Form Successfull Uploaded',
-			});
-		} catch (error) {
-			console.log(error);
-			// toast({
-			// 	title: 'Form Successfull Uploaded',
-			// 	description: 'Form Successfull Uploaded',
-			// });
-		}
+		// 	console.log('Create project Responce---------------> ', data);
+
+		// 	// console.log(data);
+		// 	toast({
+		// 		title: 'Form Successfull Uploaded',
+		// 		description: 'Form Successfull Uploaded',
+		// 	});
+		// } catch (error) {
+		// 	console.log(error);
+		// 	// toast({
+		// 	// 	title: 'Form Successfull Uploaded',
+		// 	// 	description: 'Form Successfull Uploaded',
+		// 	// });
+		// }
 	};
 
 	return (

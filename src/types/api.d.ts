@@ -12,14 +12,14 @@ interface Project {
 	price: string;
 	propertyType: string;
 	status: string;
-	brochure?: File;
+	brochure: File;
 	apartmentType: string[];
 	totalUnits: string;
 	possessionDate: Date;
 	totalFloors: string;
 	description: string;
 	amenities: string[];
-	masterPlan?: File;
+	masterPlan: File;
 	unitPlan?: Array<{
 		_id: string;
 		flatName: string;
@@ -39,8 +39,8 @@ interface Project {
 	}>;
 	map: string;
 	address: string;
-	thumbnail?: File;
-	coverImages?: File[];
+	thumbnail: File;
+	coverImages: File[];
 	isPublished: boolean;
 	createdAt?: string;
 	updatedAt?: string;
