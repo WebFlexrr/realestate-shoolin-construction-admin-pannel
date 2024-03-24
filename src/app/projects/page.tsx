@@ -13,10 +13,7 @@ import { getCookie } from 'cookies-next';
 export default function ProjectPage() {
 	const [create, setCreate] = useState<boolean>(false);
 	const [projectData, setProjectData] = useState([]);
-	// const [isEditOpen, setIsEditOpen] = useState(false);
-	// const [isEditableProjectData, setIsEditableProjectData] = useState<
-	// 	Project | undefined
-	// >(undefined);
+
 	const fetchEnquiry = async () => {
 		try {
 			const { data } = await axios.get(

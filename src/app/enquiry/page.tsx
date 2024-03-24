@@ -4,43 +4,12 @@ import SideBar from '@/components/SideBar';
 import { DataTable } from './data-table';
 import { columns } from './columns';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { getCookie } from 'cookies-next';
-
-interface Enquiry {
-	id: string;
-	name: string;
-	phone: number;
-	email: string;
-	message: string;
-}
+import { useAppSelector } from '@/lib/redux/hooks';
+import { useGetAllEnquiryQuery } from '@/lib/redux/api/apiEnquirySlice';
 
 const EnquiryPage = () => {
-	const [enquiryData, setEnquiryData] = useState<Enquiry[]>([]);
-	getCookie('accessToken');
-	console.log(getCookie('accessToken'));
-	const fetchEnquiry = async () => {
-		try {
-			const { data } = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/enquiry/getAllEnquiry`,
-				{
-					headers: {
-						Authorization: ` Bearer ${getCookie('accessToken')}`,
-					},
-					// withCredentials: true,
-				}
-			);
-
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			setEnquiryData(data?.data);
-		} catch (error) {
-			console.log(error);
-		}
-	};
-	useEffect(() => {
-		void fetchEnquiry();
-	}, []);
+	const enquiry = useAppSelector((state) => state.enquiry.enquiry);
+	useGetAllEnquiryQuery('');
 
 	return (
 		<main className="flex h-full w-full">
@@ -54,7 +23,7 @@ const EnquiryPage = () => {
 						<span className="text-3xl font-semibold">Enquiries</span>
 					</section>
 					<section className="mx-auto  flex h-full w-full max-w-7xl  flex-col  gap-5 ">
-						<DataTable columns={columns} data={enquiryData} />
+						<DataTable columns={columns} data={enquiry} />
 					</section>
 				</section>
 			</ScrollArea>

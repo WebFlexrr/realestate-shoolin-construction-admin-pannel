@@ -52,7 +52,7 @@ const ProjectPage = ({ params }: { params: { id: string } }) => {
 		void fetchProjectData();
 	});
 
-	console.log('fertch', fetchedProjectData);
+	// console.log('fertch', fetchedProjectData);
 
 	return (
 		<main className="flex h-full w-full">

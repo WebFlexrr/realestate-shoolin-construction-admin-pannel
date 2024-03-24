@@ -22,8 +22,9 @@ import axios from 'axios';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import Cookies from 'universal-cookie';
 import { useRouter } from 'next/navigation';
+import { setCookie } from 'cookies-next';
+import { toast } from 'react-toastify';
 
 const formSchema = z.object({
 	email: z
@@ -42,10 +43,6 @@ const formSchema = z.object({
 type FormDataType = z.infer<typeof formSchema>;
 
 export default function SignIn(): JSX.Element {
-	// const cookieStore = cookies();
-	// const accessToken = cookieStore.get('accessToken');
-	const cookies = new Cookies();
-
 	const router = useRouter();
 	const form = useForm<FormDataType>({
 		resolver: zodResolver(formSchema),
@@ -56,24 +53,45 @@ export default function SignIn(): JSX.Element {
 		// Do something with the form values.
 		// ✅ This will be type-safe and validated.
 		try {
-			const { data } = await axios(
+			const { data } = await axios.post(
 				`${process.env.NEXT_PUBLIC_API_URL}/users/adminLogin`,
-				{
-					method: 'post',
-					data: value,
-				}
+				value
 			);
 
-			cookies.set('accessToken', data.data.accessToken);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			toast.success(data.message, {
+				position: 'top-center',
+				autoClose: 4000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: false,
+				draggable: true,
+				progress: 0,
+				theme: 'light',
+				// transition: Flip,
+			});
+
+			setCookie('accessToken', data.data.accessToken);
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 			localStorage.setItem('accessToken', data?.data?.accessToken);
 
-			console.log(data);
-			// console.log(cookies.get('accessToken'));
+			// console.log(data);
 
 			router.push('/');
-		} catch (error) {
+		} catch (error: unknown) {
 			console.log('error', error);
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			toast.error('Invalid email & password credentials', {
+				position: 'top-center',
+				autoClose: 4000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: false,
+				draggable: true,
+				progress: 0,
+				theme: 'light',
+				// transition: Flip,
+			});
 		}
 	};
 

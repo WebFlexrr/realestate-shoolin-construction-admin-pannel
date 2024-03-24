@@ -9,7 +9,6 @@ import {
 } from '@/components/ui/card';
 import { ArrowLeft, CalendarIcon } from 'lucide-react';
 import React, { type FC, type Dispatch, type SetStateAction } from 'react';
-import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
 	Form,
@@ -45,126 +44,9 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
 import { useToast } from '@/components/ui/use-toast';
-import { ToastAction } from '@/components/ui/toast';
 import { getCookie } from 'cookies-next';
-
-const amenities = [
-	{
-		id: 'elevator',
-		label: 'Elevator',
-	},
-	{
-		id: 'security-camera',
-		label: 'Security Camera',
-	},
-	{
-		id: '24/7-power-backup',
-		label: '24/7 Power Backup',
-	},
-	{
-		id: '24/7-water-supply',
-		label: '24/7 Water Supply',
-	},
-	{
-		id: 'garden',
-		label: 'Garden',
-	},
-	{
-		id: 'swimming-pool',
-		label: 'Swimming Pool',
-	},
-] as const;
-
-const apartmentTypes = [
-	{
-		id: '1',
-		label: '1 BHK',
-	},
-	{
-		id: '2',
-		label: '2 BHK',
-	},
-	{
-		id: '3',
-		label: '3BHK',
-	},
-	{
-		id: '4',
-		label: '4BHK',
-	},
-	{
-		id: '5',
-		label: '5BHK',
-	},
-] as const;
-
-const formSchema = z.object({
-	name: z.string().trim(),
-	price: z.string(),
-	propertyType: z.string(),
-	status: z.string(),
-	brochure: z
-		.custom<File>((v) => v instanceof File, {
-			message: 'Brochure is required',
-		})
-		.refine((value) => value.type === 'application/pdf', {
-			message: 'You can enter only pdf.',
-		}),
-	apartmentType: z
-		.string()
-		.array()
-		.refine((value) => value.some((item) => item), {
-			message: 'You have to select at least one item.',
-		}),
-	totalUnits: z.string(),
-	possessionDate: z.date({
-		required_error: 'A date of birth is required.',
-	}),
-	totalFloors: z.string(),
-	description: z.string().trim(),
-	amenities: z
-		.string()
-		.array()
-		.refine((value) => value.some((item) => item), {
-			message: 'You have to select at least one item.',
-		}),
-
-	masterPlan: z.custom<File>((v) => v instanceof File, {
-		message: 'Master plan is required',
-	}),
-	unitPlan: z
-		.object({
-			flatName: z.string(),
-			floorNo: z.string(),
-			image: z
-				.custom<File>((v) => v instanceof File, {
-					message: 'Master plan is required',
-				})
-				.optional(),
-			coveredArea: z.string(),
-			stairArea: z.string(),
-			builtUpArea: z.string(),
-			serviceArea: z.string(),
-			totalArea: z.string(),
-			sold: z.boolean(),
-			price: z.string(),
-		})
-		.array()
-		.optional(),
-	map: z.string().url(),
-	address: z.string().trim(),
-	thumbnail: z.custom<File>((v) => v instanceof File, {
-		message: 'thumbnail is required',
-	}),
-	coverImages: z
-		.custom<File>((v) => v instanceof File, {
-			message: 'coverImages is required',
-		})
-		.array(),
-	isPublished: z.boolean().default(false).optional(),
-});
-
-type form = z.infer<typeof formSchema>;
+import { amenities, apartmentTypes, type form, formSchema } from './formSchema';
+import { uploadSingleFileToS3 } from '@/utils/file-upload';
 
 interface CreateProjectsFormProps {
 	setCreate: Dispatch<SetStateAction<boolean>>;
@@ -172,6 +54,7 @@ interface CreateProjectsFormProps {
 
 const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	const { toast } = useToast();
+
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -236,65 +119,6 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	const handleRemove = (index: number) => {
 		remove(index);
 	};
-
-	const uploadSingleFileToS3 = async (file: File) => {
-		console.log('file', file);
-
-		try {
-			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/generateUploadUrl`,
-				{
-					fileType: file.type,
-				}
-			);
-
-			const { uploadUrl, url, key } = data.data;
-
-			await axios.put(
-				// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-				uploadUrl,
-				file
-			);
-
-			console.log(url);
-			console.log(key);
-			toast({
-				title: 'File Uploaded',
-				description: 'There was a problem with your request.',
-				action: <ToastAction altText="Try again">Try again</ToastAction>,
-			});
-			return url;
-		} catch (error) {
-			toast({
-				variant: 'destructive',
-				title: 'Uh oh! Something went wrong. File Not uploaded',
-				description: 'There was a problem with your request.',
-				action: <ToastAction altText="Try again">Try again</ToastAction>,
-			});
-
-			console.log(error);
-		}
-	};
-
-	// const uploadMultipleFileToS3 = async (files: File[]) => {
-	// 	console.log('Files', files);
-
-	// 	const requests = files.map(async (file) =>
-	// 		await axios.post(
-	// 			`${process.env.NEXT_PUBLIC_API_URL}/projects/generateUploadUrl`,
-	// 			{
-	// 				fileType: file.type,
-	// 			}
-	// 		)
-	// 	);
-
-	// 	axios
-	// 		.all(requests)
-	// 		.then((data) => console.log(data))
-	// 		.catch((error) => console.log(error));
-
-	// 	return files;
-	// };
 
 	const onSubmit = async (values: form) => {
 		// console.log('get value', values);

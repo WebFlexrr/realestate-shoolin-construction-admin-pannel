@@ -22,16 +22,12 @@ interface DataTableProps<TData extends Project, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
 	setCreate: Dispatch<SetStateAction<boolean>>;
-	// setIsEditableProjectData: Dispatch<SetStateAction<Project | undefined>>;
-	// setIsEditOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export function DataTable<TData extends Project, TValue>({
 	columns,
 	data,
 	setCreate,
-	// setIsEditableProjectData,
-	// setIsEditOpen,
 }: DataTableProps<TData, TValue>) {
 	const [rowSelection, setRowSelection] = React.useState({});
 	const table = useReactTable({
@@ -116,40 +112,14 @@ export function DataTable<TData extends Project, TValue>({
 									key={row.id}
 									data-state={row.getIsSelected() && 'selected'}
 								>
-									{row.getVisibleCells().map((cell) => {
-										// console.log(
-										// 	'Cell'
-										// 	// cell.id === '0_edit' ? '0_edit true' : 'false'
-										// 	// cell.column.columnDef.cell
-										// 	// cell.getContext().row.original
-										// );
-										// return cell.id === '0_edit' ? (
-										// 	<TableCell key={cell.id} className="truncate text-base">
-										// 		<button
-										// 			onClick={() => {
-										// 				// console.log(
-										// 				// 	'get Project Datas',
-										// 				// 	cell.getContext().row.original
-										// 				// );
-										// 			}}
-										// 		>
-										// 			{flexRender(
-										// 				cell.column.columnDef.cell,
-										// 				cell.getContext()
-										// 			)}
-										// 		</button>
-										// 	</TableCell>
-										// ) : (
-										return (
-											<TableCell key={cell.id} className="truncate text-base">
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext()
-												)}
-											</TableCell>
-										);
-										// );
-									})}
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id} className="truncate text-base">
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext()
+											)}
+										</TableCell>
+									))}
 								</TableRow>
 							))
 						) : (
