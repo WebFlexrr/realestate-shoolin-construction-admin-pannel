@@ -9,11 +9,13 @@ import { ToastAction } from '@/components/ui/toast';
 import axios from 'axios';
 import { useToast } from '@/components/ui/use-toast';
 import { getCookie } from 'cookies-next';
+import { useGetSingleProjectQuery } from '@/lib/redux/api/apiProjectSlice';
 
 const ProjectPage = ({ params }: { params: { id: string } }) => {
 	const id = params.id;
-
 	const [fetchedProjectData, setFetchedProjectData] = useState<Project>();
+	useGetSingleProjectQuery(id);
+
 	const { toast } = useToast();
 
 	const fetchProjectData = async () => {
@@ -35,6 +37,7 @@ const ProjectPage = ({ params }: { params: { id: string } }) => {
 			// delete projectData.masterPlan;
 			// delete projectData.thumbnail;
 			// delete projectData.coverImages;
+			console.log(projectData);
 
 			setFetchedProjectData(projectData);
 		} catch (error) {

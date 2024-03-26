@@ -43,18 +43,16 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
-import { useToast } from '@/components/ui/use-toast';
 import { getCookie } from 'cookies-next';
 import { amenities, apartmentTypes, type form, formSchema } from './formSchema';
 import { uploadSingleFileToS3 } from '@/utils/file-upload';
+import { toast } from 'react-toastify';
 
 interface CreateProjectsFormProps {
 	setCreate: Dispatch<SetStateAction<boolean>>;
 }
 
 const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
-	const { toast } = useToast();
-
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -166,17 +164,31 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 			console.log('Create project Responce---------------> ', data);
 
 			// console.log(data);
-			toast({
-				title: 'Form Successfull Uploaded',
-				description: 'Form Successfull Uploaded',
+			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			toast.success(data.message, {
+				position: 'top-center',
+				autoClose: 4000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: false,
+				draggable: true,
+				progress: 0,
+				theme: 'light',
+				// transition: Flip,
 			});
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		} catch (error: any) {
 			console.log(error);
-			toast({
-				variant: 'destructive',
-				title: 'Error happened',
-				description: error.response.message,
+			toast.error('something error happend', {
+				position: 'top-center',
+				autoClose: 4000,
+				hideProgressBar: false,
+				closeOnClick: true,
+				pauseOnHover: false,
+				draggable: true,
+				progress: 0,
+				theme: 'light',
+				// transition: Flip,
 			});
 			// toast({
 			// 	title: 'Form Successfull Uploaded',

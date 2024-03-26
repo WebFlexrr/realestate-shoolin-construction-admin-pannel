@@ -4,36 +4,15 @@ import SideBar from '@/components/SideBar';
 import { DataTable } from './data-table';
 import { projectColumns } from './columns';
 import CreateProjectsForm from './CreateProjectsForm';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import axios from 'axios';
-// import EditProject from './EditProject';
-import { getCookie } from 'cookies-next';
+import { useAppSelector } from '@/lib/redux/hooks';
+import { useGetAllProjectsQuery } from '@/lib/redux/api/apiProjectSlice';
 
 export default function ProjectPage() {
 	const [create, setCreate] = useState<boolean>(false);
-	const [projectData, setProjectData] = useState([]);
-
-	const fetchEnquiry = async () => {
-		try {
-			const { data } = await axios.get(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/getAllProjects`,
-				{
-					headers: {
-						Authorization: ` Bearer ${getCookie('accessToken')}`,
-					},
-				}
-			);
-
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			setProjectData(data?.data);
-		} catch (error) {
-			console.log(error);
-		}
-	};
-	useEffect(() => {
-		void fetchEnquiry();
-	}, []);
+	const project = useAppSelector((state) => state.project.projects);
+	useGetAllProjectsQuery('');
 
 	return (
 		<main className="flex h-full w-full">
@@ -54,7 +33,7 @@ export default function ProjectPage() {
 							<section className="mx-auto flex h-full w-full max-w-7xl flex-col ">
 								<DataTable
 									columns={projectColumns}
-									data={projectData}
+									data={project}
 									setCreate={setCreate}
 								/>
 							</section>

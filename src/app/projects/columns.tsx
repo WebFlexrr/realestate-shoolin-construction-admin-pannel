@@ -9,25 +9,65 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { type ColumnDef } from '@tanstack/react-table';
+import axios from 'axios';
+import { getCookie } from 'cookies-next';
 // import axios from 'axios';
 // import { getCookie } from 'cookies-next';
 import Link from 'next/link';
+import { toast } from 'react-toastify';
 
-// const handleDelete = async (id: string) => {
-// 	try {
-// 		const { data } = await axios.delete(
-// 			`${process.env.NEXT_PUBLIC_API_URL}/projects/deleteSingleProject`,
-// 			{
+export const handleDelete = async (ids: string[]) => {
+	if (ids.length === 0) {
+		toast.warning('Items are not selected', {
+			position: 'top-center',
+			autoClose: 4000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: false,
+			draggable: true,
+			progress: 0,
+			theme: 'light',
+		});
+	}
 
-// 				id,
-// 			}
+	try {
+		await axios.delete(
+			`${process.env.NEXT_PUBLIC_API_URL}/projects/deleteProject`,
+			{
+				headers: {
+					Authorization: `Bearer ${getCookie('accessToken')}`,
+				},
+				data: {
+					id: [...ids],
+				},
+			}
+		);
 
-// 		);
-// 		console.log(data);
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// };
+		toast.success('Item deleted', {
+			position: 'top-center',
+			autoClose: 4000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: false,
+			draggable: true,
+			progress: 0,
+			theme: 'light',
+		});
+		window.location.reload();
+	} catch (error) {
+		console.log(error);
+		toast.error('Item not deleted', {
+			position: 'top-center',
+			autoClose: 4000,
+			hideProgressBar: false,
+			closeOnClick: true,
+			pauseOnHover: false,
+			draggable: true,
+			progress: 0,
+			theme: 'light',
+		});
+	}
+};
 
 export const projectColumns: Array<ColumnDef<Project>> = [
 	{
@@ -64,11 +104,6 @@ export const projectColumns: Array<ColumnDef<Project>> = [
 		accessorKey: '_id',
 		header: 'Id',
 	},
-
-	// {
-	// 	accessorKey: 'tags',
-	// 	header: 'Tags',
-	// },
 	{
 		accessorKey: 'isPublished',
 		header: 'isPublished',
@@ -90,18 +125,16 @@ export const projectColumns: Array<ColumnDef<Project>> = [
 						<DropdownMenuContent>
 							<DropdownMenuLabel>My Account</DropdownMenuLabel>
 							<DropdownMenuSeparator />
-							<Link href={`/projects/${row.original._id}`}>
+							<Link href={`/projects/${row.original.slug}`}>
 								<DropdownMenuItem>Edit</DropdownMenuItem>
 							</Link>
-							{/* <DropdownMenuItem
+							<DropdownMenuItem
 								onClick={() => {
-									// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-									void handleDelete(row.original._id!);
-									window.location.reload();
+									void handleDelete([row.original._id]);
 								}}
 							>
 								Delete
-							</DropdownMenuItem> */}
+							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</>

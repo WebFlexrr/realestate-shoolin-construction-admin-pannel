@@ -4,11 +4,14 @@ interface Enquiry {
 	phone: number;
 	email: string;
 	message: string;
+	createdAt: string;
+	updatedAt: string;
 }
 
 interface Project {
-	_id?: string;
+	_id: string;
 	name: string;
+	slug: string;
 	price: string;
 	propertyType: string;
 	status: string;
@@ -42,7 +45,7 @@ interface Project {
 	thumbnail: File;
 	coverImages: File[];
 	isPublished: boolean;
-	createdAt?: string;
-	updatedAt?: string;
+	createdAt: string;
+	updatedAt: string;
 	__v?: number;
 }

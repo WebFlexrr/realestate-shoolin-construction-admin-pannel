@@ -6,13 +6,14 @@ import { Headset, HomeIcon, User } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAppSelector } from '@/lib/redux/hooks';
 import { useGetAllEnquiryQuery } from '@/lib/redux/api/apiEnquirySlice';
+import { useGetAllProjectsQuery } from '@/lib/redux/api/apiProjectSlice';
 // import { useGetAllProjectsQuery } from '@/lib/redux/api/apiProjectSlice';
 
 export default function Home() {
 	const enquiry = useAppSelector((state) => state.enquiry.enquiry);
-	// const project = useAppSelector((state)=>state.project.projects);
-	// console.log(project)
-	// useGetAllProjectsQuery('');
+	const project = useAppSelector((state) => state.project.projects);
+	console.log(project);
+	useGetAllProjectsQuery('');
 	useGetAllEnquiryQuery('');
 
 	return (
@@ -38,7 +39,7 @@ export default function Home() {
 
 								<CardContent className=" ">
 									<div className="flex  h-full w-full items-center justify-center text-4xl font-bold">
-										{/* {project.length} */}
+										{project.length}
 									</div>
 								</CardContent>
 							</Card>

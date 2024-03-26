@@ -17,6 +17,7 @@ import {
 import React, { type Dispatch, type SetStateAction } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { handleDelete } from './columns';
 
 interface DataTableProps<TData extends Project, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
@@ -60,6 +61,20 @@ export function DataTable<TData extends Project, TValue>({
 				</div>
 				<div className="flex items-center justify-end space-x-2 ">
 					<Button
+						variant={'default'}
+						onClick={() =>
+							// eslint-disable-next-line no-void
+							void handleDelete(
+								table
+									.getFilteredSelectedRowModel()
+									.rows.map((item) => item.original._id)
+							)
+						}
+						disabled={!table.getFilteredSelectedRowModel().rows.length}
+					>
+						Delete
+					</Button>
+					<Button
 						variant="outline"
 						size="sm"
 						onClick={() => {
@@ -70,8 +85,8 @@ export function DataTable<TData extends Project, TValue>({
 						Previous
 					</Button>
 
-					{/* {table.getPageOptions()} */}
-					{/* {table.getPageCount()} */}
+					{table.getPageOptions()}
+					{table.getPageCount()}
 					<Button
 						variant="outline"
 						size="sm"
@@ -96,6 +111,7 @@ export function DataTable<TData extends Project, TValue>({
 											{header.isPlaceholder
 												? null
 												: flexRender(
+														// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 														header.column.columnDef.header,
 														header.getContext()
 													)}
@@ -115,6 +131,7 @@ export function DataTable<TData extends Project, TValue>({
 									{row.getVisibleCells().map((cell) => (
 										<TableCell key={cell.id} className="truncate text-base">
 											{flexRender(
+												// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 												cell.column.columnDef.cell,
 												cell.getContext()
 											)}
