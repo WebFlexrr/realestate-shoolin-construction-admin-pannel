@@ -8,32 +8,29 @@ interface Enquiry {
 	updatedAt: string;
 }
 
-interface Project {
-	_id: string;
+interface CreateProject {
 	name: string;
-	slug: string;
 	price: string;
 	propertyType: string;
 	status: string;
-	brochure: File;
+	brochure?: string;
 	apartmentType: string[];
 	totalUnits: string;
 	possessionDate: Date;
 	totalFloors: string;
 	description: string;
 	amenities: string[];
-	masterPlan: File;
-	unitPlan?: Array<{
-		_id: string;
+	masterPlan?: string;
+	unitPlan: Array<{
 		flatName: string;
 		floorNo: string;
-		image?: File;
-		coveredArea: string;
-		stairArea: string;
-		builtUpArea: string;
-		serviceArea: string;
-		totalArea: string;
-		sold: boolean;
+		image?: string | File;
+		coveredArea?: string;
+		stairArea?: string;
+		builtUpArea?: string;
+		serviceArea?: string;
+		totalArea?: string;
+		sold?: boolean;
 		price: string;
 	}>;
 	constructionStatus?: Array<{
@@ -42,10 +39,34 @@ interface Project {
 	}>;
 	map: string;
 	address: string;
-	thumbnail: File;
-	coverImages: File[];
+	thumbnail?: string;
+	coverImages?: Array<string | undefined>;
 	isPublished: boolean;
+}
+interface ProjectResponse extends CreateProject {
+	_id: string;
+	slug: string;
+	name?: string;
+	price?: string;
+	propertyType: string;
+	status: string;
+	brochure?: File;
+	masterPlan?: File;
+	unitPlan: Array<{
+		flatName: string;
+		floorNo: string;
+		image?: File;
+		coveredArea?: string;
+		stairArea?: string;
+		builtUpArea?: string;
+		serviceArea?: string;
+		totalArea?: string;
+		sold?: boolean;
+		price: string;
+	}>;
+	thumbnail?: File;
+	coverImages?: Array<File | undefined>;
 	createdAt: string;
 	updatedAt: string;
-	__v?: number;
+	__v: number;
 }

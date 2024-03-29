@@ -22,7 +22,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
 import {
 	Popover,
 	PopoverContent,
@@ -42,17 +41,29 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import axios from 'axios';
-import { getCookie } from 'cookies-next';
 import { amenities, apartmentTypes, type form, formSchema } from './formSchema';
-import { uploadSingleFileToS3 } from '@/utils/file-upload';
+import {
+	uploadMultipleFileToS3,
+	uploadSingleFileToS3,
+} from '@/utils/file-upload';
 import { toast } from 'react-toastify';
+import {
+	Dialog,
+	DialogClose,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from '@/components/ui/dialog';
+import { useCreateNewProjectMutation } from '@/lib/redux/api/apiProjectSlice';
 
 interface CreateProjectsFormProps {
 	setCreate: Dispatch<SetStateAction<boolean>>;
 }
 
 const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
+	const [createNewProject, isLoading] = useCreateNewProjectMutation();
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -66,19 +77,6 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 			totalFloors: '',
 			description: '',
 			amenities: [],
-			// unitPlan: [
-			// 	{
-			// 		flatName: '',
-			// 		floorNo: '1',
-			// 		coveredArea: '',
-			// 		stairArea: '',
-			// 		builtUpArea: '',
-			// 		serviceArea: '',
-			// 		totalArea: '',
-			// 		sold: false,
-			// 		price: '',
-			// 	},
-			// ],
 			map: '',
 			address: '',
 			isPublished: false,
@@ -103,13 +101,13 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	const handleAppend = () => {
 		append({
 			flatName: '',
-			floorNo: '1',
+			floorNo: '',
+			image: undefined,
 			coveredArea: '',
 			stairArea: '',
 			builtUpArea: '',
 			serviceArea: '',
 			totalArea: '',
-			sold: false,
 			price: '',
 		});
 	};
@@ -119,21 +117,26 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 	};
 
 	const onSubmit = async (values: form) => {
-		// console.log('get value', values);
+		// console.log('Cover Images', values.coverImages);
+		console.log('get value', values);
 
 		// eslint-disable-next-line @typescript-eslint/no-confusing-void-expression
 		try {
-			const brochureUrlData: string = await uploadSingleFileToS3(
-				values.brochure
-			);
-			const masterPlanUrlData: string = await uploadSingleFileToS3(
-				values.masterPlan
-			);
-			const thumbnailUrlData: string = await uploadSingleFileToS3(
-				values.thumbnail
-			);
+			const brochureUrlData = await uploadSingleFileToS3(values.brochure);
+			const masterPlanUrlData = await uploadSingleFileToS3(values.masterPlan);
+			const thumbnailUrlData = await uploadSingleFileToS3(values.thumbnail);
 
-			const coverImages = await uploadSingleFileToS3(values.coverImages[0]);
+			const coverImages = await uploadMultipleFileToS3(values.coverImages);
+
+			const preSignedUrlInUnits = [];
+
+			for (const unit of values.unitPlan) {
+				const preSignedUrl = await uploadSingleFileToS3(unit.image);
+
+				preSignedUrlInUnits.push({ ...unit, image: preSignedUrl });
+			}
+
+			console.log('Cover Images', coverImages);
 
 			console.log('brochureUrlData', brochureUrlData);
 			console.log('masterPlanUrlData', masterPlanUrlData);
@@ -144,40 +147,42 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 				...values,
 				brochure: brochureUrlData,
 				masterPlan: masterPlanUrlData,
-
+				unitPlan: preSignedUrlInUnits,
 				thumbnail: thumbnailUrlData,
-				coverImages: [coverImages],
+				coverImages: coverImages === undefined ? undefined : [...coverImages],
 			};
-			console.log(updatedFormData);
+			// 	console.log(updatedFormData);
 
-			const { data } = await axios.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
-				updatedFormData,
-				{
-					headers: {
-						Authorization: ` Bearer ${getCookie('accessToken')}`,
-					},
-					// withCredentials: true,
-				}
-			);
+			const response = await createNewProject(updatedFormData).unwrap();
+			console.log(response);
+			// 	const { data } = await axios.post(
+			// 		`${process.env.NEXT_PUBLIC_API_URL}/projects/createProject`,
+			// 		updatedFormData,
+			// 		{
+			// 			headers: {
+			// 				Authorization: ` Bearer ${getCookie('accessToken')}`,
+			// 			},
+			// 			// withCredentials: true,
+			// 		}
+			// 	);
 
-			console.log('Create project Responce---------------> ', data);
+			// 	console.log('Create project Responce---------------> ', data);
 
-			// console.log(data);
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-			toast.success(data.message, {
-				position: 'top-center',
-				autoClose: 4000,
-				hideProgressBar: false,
-				closeOnClick: true,
-				pauseOnHover: false,
-				draggable: true,
-				progress: 0,
-				theme: 'light',
-				// transition: Flip,
-			});
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		} catch (error: any) {
+			// 	// console.log(data);
+			// 	// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+			// 	toast.success(data.message, {
+			// 		position: 'top-center',
+			// 		autoClose: 4000,
+			// 		hideProgressBar: false,
+			// 		closeOnClick: true,
+			// 		pauseOnHover: false,
+			// 		draggable: true,
+			// 		progress: 0,
+			// 		theme: 'light',
+			// 		// transition: Flip,
+			// 	});
+			// 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (error: unknown) {
 			console.log(error);
 			toast.error('something error happend', {
 				position: 'top-center',
@@ -190,10 +195,6 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 				theme: 'light',
 				// transition: Flip,
 			});
-			// toast({
-			// 	title: 'Form Successfull Uploaded',
-			// 	description: 'Form Successfull Uploaded',
-			// });
 		}
 	};
 
@@ -232,8 +233,27 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 												</FormItem>
 											)}
 										/>
-										<Button form="project" type="submit">
-											Submit
+										<Button form="project" type="submit" disabled={!isLoading}>
+											{isLoading ? (
+												<span>Submit</span>
+											) : (
+												<svg
+													aria-hidden="true"
+													className="inline h-6 w-6 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
+													viewBox="0 0 100 101"
+													fill="none"
+													xmlns="http://www.w3.org/2000/svg"
+												>
+													<path
+														d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+														fill="currentColor"
+													/>
+													<path
+														d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+														fill="currentFill"
+													/>
+												</svg>
+											)}
 										</Button>
 									</section>
 								</section>
@@ -652,6 +672,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 														onChange={(e) => {
 															// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 															onChange(Object.values(e.target.files!));
+															// onChange(e.target.files);
 														}}
 														placeholder="Master Plan"
 														multiple
@@ -664,7 +685,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 									/>
 								</CardContent>
 							</Card>
-							<Card className="col-span-1 lg:col-span-2">
+							<Card className="col-span-1 lg:col-span-1">
 								<CardHeader className="w-full ">
 									<CardTitle className="flex w-full justify-between">
 										<section className="flex w-full items-center justify-between ">
@@ -685,7 +706,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 											<CardHeader>
 												<CardTitle>Item no {index + 1}</CardTitle>
 											</CardHeader>
-											<CardContent className="grid grid-cols-1 gap-3 p-5 lg:grid-cols-8">
+											<CardContent className="grid grid-cols-1 items-center gap-3 lg:grid-cols-4">
 												<FormField
 													control={form.control}
 													name={`unitPlan.${index}.flatName`}
@@ -696,6 +717,7 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 																<Input
 																	placeholder="Enter the floor name"
 																	{...field}
+																	disabled
 																/>
 															</FormControl>
 															<FormMessage />
@@ -712,145 +734,8 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 																<Input
 																	placeholder="Enter the floor number"
 																	{...field}
+																	disabled
 																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.image`}
-													render={({
-														field: { ref, name, onBlur, onChange },
-													}) => (
-														<FormItem>
-															<FormLabel>Image</FormLabel>
-															<FormControl>
-																<Input
-																	type="file"
-																	placeholder="Enter the Brochure"
-																	// {...field}
-																	ref={ref}
-																	name={name}
-																	onBlur={onBlur}
-																	onChange={(e) => {
-																		onChange(e.target.files?.[0]);
-																	}}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.coveredArea`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Covered Area</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Enter the Covered Area"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.stairArea`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Stair Area</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Enter the Stair Area"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.builtUpArea`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Built Up Area</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Enter the Built Up Area"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.serviceArea`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Service Area</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Enter the Service Area"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.totalArea`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>Total Area</FormLabel>
-															<FormControl>
-																<Input
-																	placeholder="Enter Total Area"
-																	{...field}
-																/>
-															</FormControl>
-															<FormMessage />
-														</FormItem>
-													)}
-												/>
-												<FormField
-													control={form.control}
-													name={`unitPlan.${index}.sold`}
-													render={({ field }) => (
-														<FormItem>
-															<FormLabel>is Sold</FormLabel>
-															<FormControl>
-																<Switch
-																	checked={field.value}
-																	onCheckedChange={field.onChange}
-																/>
-																{/* <Select
-																	onValueChange={field.onChange}
-																	defaultValue={field.value}
-																>
-																	<FormControl>
-																		<SelectTrigger>
-																			<SelectValue placeholder="Select the Status of the Project" />
-																		</SelectTrigger>
-																	</FormControl>
-																	<SelectContent>
-																		<SelectItem value={'false'}>
-																			False
-																		</SelectItem>
-																		<SelectItem value={'true'}>true</SelectItem>
-																	</SelectContent>
-																</Select> */}
 															</FormControl>
 															<FormMessage />
 														</FormItem>
@@ -869,6 +754,227 @@ const CreateProjectsForm: FC<CreateProjectsFormProps> = ({ setCreate }) => {
 														</FormItem>
 													)}
 												/>
+												<FormField
+													control={form.control}
+													name={`unitPlan.${index}.sold`}
+													render={({ field }) => (
+														<FormItem className="flex flex-col">
+															<FormLabel>is Sold</FormLabel>
+															<FormControl>
+																<Switch
+																	checked={field.value}
+																	onCheckedChange={field.onChange}
+																/>
+															</FormControl>
+															<FormMessage />
+														</FormItem>
+													)}
+												/>
+
+												<Dialog>
+													<DialogTrigger className="w-full">
+														<Button
+															variant={'outline'}
+															className="w-full border border-primary"
+														>
+															Edit
+														</Button>
+													</DialogTrigger>
+													<DialogContent className="">
+														<DialogHeader>
+															<DialogTitle>
+																Are you absolutely sure?
+															</DialogTitle>
+															<DialogDescription>
+																This action cannot be undone. This will
+																permanently delete your account and remove your
+																data from our servers.
+															</DialogDescription>
+															<section className="grid w-full grid-cols-2 gap-5">
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.flatName`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Flat Name</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the floor name"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.floorNo`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>floor number</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the floor number"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.image`}
+																	render={({
+																		field: { ref, name, onBlur, onChange },
+																	}) => (
+																		<FormItem>
+																			<FormLabel>Image</FormLabel>
+																			<FormControl>
+																				<Input
+																					type="file"
+																					placeholder="Enter the Image"
+																					ref={ref}
+																					name={name}
+																					onBlur={onBlur}
+																					onChange={(e) => {
+																						onChange(e.target.files?.[0]);
+																					}}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.coveredArea`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Covered Area</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the Covered Area"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.stairArea`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Stair Area</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the Stair Area"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.builtUpArea`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Built Up Area</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the Built Up Area"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.serviceArea`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Service Area</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter the Service Area"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.totalArea`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Total Area</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter Total Area"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.sold`}
+																	render={({ field }) => (
+																		<FormItem className="flex flex-col">
+																			<FormLabel>is Sold</FormLabel>
+																			<FormControl>
+																				<Switch
+																					checked={field.value}
+																					onCheckedChange={field.onChange}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<FormField
+																	control={form.control}
+																	name={`unitPlan.${index}.price`}
+																	render={({ field }) => (
+																		<FormItem>
+																			<FormLabel>Price</FormLabel>
+																			<FormControl>
+																				<Input
+																					placeholder="Enter Price"
+																					{...field}
+																				/>
+																			</FormControl>
+																			<FormMessage />
+																		</FormItem>
+																	)}
+																/>
+																<Button
+																	onClick={() => {
+																		handleRemove(index);
+																	}}
+																>
+																	remove
+																</Button>
+																<DialogClose asChild>
+																	<Button type="button" variant="secondary">
+																		Close
+																	</Button>
+																</DialogClose>
+															</section>
+														</DialogHeader>
+													</DialogContent>
+												</Dialog>
 												<Button
 													onClick={() => {
 														handleRemove(index);

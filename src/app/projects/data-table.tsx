@@ -19,13 +19,13 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { handleDelete } from './columns';
 
-interface DataTableProps<TData extends Project, TValue> {
+interface DataTableProps<TData extends ProjectResponse, TValue> {
 	columns: Array<ColumnDef<TData, TValue>>;
 	data: TData[];
 	setCreate: Dispatch<SetStateAction<boolean>>;
 }
 
-export function DataTable<TData extends Project, TValue>({
+export function DataTable<TData extends ProjectResponse, TValue>({
 	columns,
 	data,
 	setCreate,
@@ -65,6 +65,7 @@ export function DataTable<TData extends Project, TValue>({
 						onClick={() =>
 							// eslint-disable-next-line no-void
 							void handleDelete(
+								// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 								table
 									.getFilteredSelectedRowModel()
 									.rows.map((item) => item.original._id)

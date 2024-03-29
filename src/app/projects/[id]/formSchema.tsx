@@ -51,10 +51,10 @@ export const apartmentTypes = [
 ] as const;
 
 export const formSchema = z.object({
-	name: z.string().trim(),
-	price: z.string(),
-	propertyType: z.string(),
-	status: z.string(),
+	name: z.string().trim().optional(),
+	price: z.string().optional(),
+	propertyType: z.string().optional(),
+	status: z.string().optional(),
 	brochure: z
 		.custom<File>((v) => v instanceof File, {
 			message: 'Brochure is required',
@@ -68,19 +68,23 @@ export const formSchema = z.object({
 		.array()
 		.refine((value) => value.some((item) => item), {
 			message: 'You have to select at least one item.',
-		}),
-	totalUnits: z.string(),
-	possessionDate: z.date({
-		required_error: 'A date of birth is required.',
-	}),
-	totalFloors: z.string(),
-	description: z.string().trim(),
+		})
+		.optional(),
+	totalUnits: z.string().optional(),
+	possessionDate: z
+		.date({
+			required_error: 'A date of birth is required.',
+		})
+		.optional(),
+	totalFloors: z.string().optional(),
+	description: z.string().trim().optional(),
 	amenities: z
 		.string()
 		.array()
 		.refine((value) => value.some((item) => item), {
 			message: 'You have to select at least one item.',
-		}),
+		})
+		.optional(),
 
 	masterPlan: z
 		.custom<File>((v) => v instanceof File, {
@@ -104,9 +108,10 @@ export const formSchema = z.object({
 			sold: z.boolean().optional(),
 			price: z.string(),
 		})
-		.array(),
-	map: z.string().url(),
-	address: z.string().trim(),
+		.array()
+		.optional(),
+	map: z.string().url().optional(),
+	address: z.string().trim().optional(),
 	thumbnail: z
 		.custom<File>((v) => v instanceof File, {
 			message: 'thumbnail is required',
@@ -119,7 +124,7 @@ export const formSchema = z.object({
 		.optional()
 		.array()
 		.optional(),
-	isPublished: z.boolean().default(false),
+	isPublished: z.boolean().default(false).optional(),
 });
 
 export type form = z.infer<typeof formSchema>;

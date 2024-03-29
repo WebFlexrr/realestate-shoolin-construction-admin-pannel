@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-export const uploadSingleFileToS3 = async (file: File) => {
+export const uploadSingleFileToS3 = async (
+	file: File | undefined
+): Promise<string | undefined> => {
+	if (file === undefined) {
+		return undefined;
+	}
+
 	console.log('file', file);
 
 	try {
@@ -12,7 +18,7 @@ export const uploadSingleFileToS3 = async (file: File) => {
 			}
 		);
 
-		const { uploadUrl, url, key } = data.data;
+		const { uploadUrl, url }: { uploadUrl: string; url: string } = data.data;
 
 		await axios.put(
 			// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -21,8 +27,7 @@ export const uploadSingleFileToS3 = async (file: File) => {
 		);
 
 		console.log(url);
-		console.log(key);
-		toast('🦄 Wow so easy!', {
+		toast.success('Nice File Properly Uploaded', {
 			position: 'top-center',
 			autoClose: 5000,
 			hideProgressBar: false,
@@ -35,7 +40,7 @@ export const uploadSingleFileToS3 = async (file: File) => {
 		});
 		return url;
 	} catch (error) {
-		toast('🦄 Wow so easy!', {
+		toast.error('Not Good Error happens', {
 			position: 'top-center',
 			autoClose: 5000,
 			hideProgressBar: false,
@@ -47,30 +52,23 @@ export const uploadSingleFileToS3 = async (file: File) => {
 			// transition: 'Bounce',
 		});
 		console.log(error);
+		return undefined;
 	}
 };
 
-export const uploadMultipleFileToS3 = async (files: File[]) => {
-	console.log('Files', files);
+export const uploadMultipleFileToS3 = async (
+	fileArray: Array<File | undefined> | undefined
+) => {
+	if (fileArray === undefined) {
+		return undefined;
+	}
+	console.log('Files', fileArray);
 
-	const requests = files.map(
-		async (file) =>
-			await axios.post(
-				`${process.env.NEXT_PUBLIC_API_URL}/projects/generateUploadUrl`,
-				{
-					fileType: file.type,
-				}
-			)
-	);
+	const preSignedUrls: Array<string | undefined> = [];
 
-	axios
-		.all(requests)
-		.then((data) => {
-			console.log(data);
-		})
-		.catch((error) => {
-			console.log(error);
-		});
-
-	return files;
+	for (const image of fileArray) {
+		const preSignedUrl = await uploadSingleFileToS3(image);
+		preSignedUrls.push(preSignedUrl);
+	}
+	return preSignedUrls;
 };

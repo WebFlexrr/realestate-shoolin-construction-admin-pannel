@@ -1,11 +1,20 @@
 'use client';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -69,7 +78,7 @@ export const handleDelete = async (ids: string[]) => {
 	}
 };
 
-export const projectColumns: Array<ColumnDef<Project>> = [
+export const projectColumns: Array<ColumnDef<ProjectResponse>> = [
 	{
 		id: 'select',
 		header: ({ table }) => (
@@ -119,22 +128,41 @@ export const projectColumns: Array<ColumnDef<Project>> = [
 					<DropdownMenu>
 						<DropdownMenuTrigger>
 							<div className="disabled:opacity-50h-10 inline-flex items-center justify-center whitespace-nowrap rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none  ">
-								Open
+								Menu
 							</div>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
-							<DropdownMenuLabel>My Account</DropdownMenuLabel>
-							<DropdownMenuSeparator />
 							<Link href={`/projects/${row.original.slug}`}>
 								<DropdownMenuItem>Edit</DropdownMenuItem>
 							</Link>
-							<DropdownMenuItem
-								onClick={() => {
-									void handleDelete([row.original._id]);
-								}}
-							>
-								Delete
-							</DropdownMenuItem>
+
+							<AlertDialog>
+								<AlertDialogTrigger className="w-full border border-black text-start">
+									Delete
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>
+											Are you absolutely sure?
+										</AlertDialogTitle>
+										<AlertDialogDescription>
+											This action cannot be undone. This will permanently delete
+											your account and remove your data from our servers.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+											onClick={() => {
+												// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+												void handleDelete([row.original._id]);
+											}}
+										>
+											Continue
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
 						</DropdownMenuContent>
 					</DropdownMenu>
 				</>

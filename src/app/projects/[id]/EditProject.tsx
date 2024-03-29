@@ -42,15 +42,10 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
-import {
-	amenities,
-	apartmentTypes,
-	type form,
-	formSchema,
-} from '../formSchema';
+import { amenities, apartmentTypes, type form, formSchema } from './formSchema';
 
 interface CreateProjectsFormProps {
-	fetchedProjectData: Project | undefined;
+	fetchedProjectData: ProjectResponse | undefined;
 	id: string;
 }
 
@@ -62,7 +57,7 @@ const EditProject: FC<CreateProjectsFormProps> = ({
 	console.log('fertch213131---->', fetchedProjectData);
 	const form = useForm<form>({
 		resolver: zodResolver(formSchema),
-		values: fetchedProjectData,
+		values: { ...fetchedProjectData },
 	});
 
 	const { control, watch } = form;
@@ -83,7 +78,8 @@ const EditProject: FC<CreateProjectsFormProps> = ({
 	const handleAppend = () => {
 		append({
 			flatName: '',
-			floorNo: '1',
+			floorNo: '',
+			image: undefined,
 			coveredArea: '',
 			stairArea: '',
 			builtUpArea: '',
@@ -351,10 +347,12 @@ const EditProject: FC<CreateProjectsFormProps> = ({
 																				checked={field.value?.includes(item.id)}
 																				onCheckedChange={(checked) => {
 																					checked
-																						? field.onChange([
-																								...field.value,
-																								item.id,
-																							])
+																						? field.onChange(
+																								field.value !== undefined
+																									? field.value.push(item.id)
+																									: undefined
+																								// item.id
+																							)
 																						: field.onChange(
 																								field.value?.filter(
 																									(value) => value !== item.id
@@ -496,10 +494,12 @@ const EditProject: FC<CreateProjectsFormProps> = ({
 																				checked={field.value?.includes(item.id)}
 																				onCheckedChange={(checked) => {
 																					checked
-																						? field.onChange([
-																								...field.value,
-																								item.id,
-																							])
+																						? field.onChange(
+																								field.value !== undefined
+																									? field.value.push(item.id)
+																									: undefined
+																								// item.id
+																							)
 																						: field.onChange(
 																								field.value?.filter(
 																									(value) => value !== item.id

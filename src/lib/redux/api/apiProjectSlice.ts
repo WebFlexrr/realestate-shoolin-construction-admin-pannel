@@ -1,6 +1,7 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { updateProject } from '../Slices/project/projectSlice';
+import { getCookie } from 'cookies-next';
 
 const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/projects`;
 
@@ -10,10 +11,15 @@ export const apiProjectSlice = createApi({
 	baseQuery: fetchBaseQuery({
 		baseUrl: BASE_URL,
 		// credentials: 'include',
+		prepareHeaders: (headers) => {
+			headers.set('Content-type', 'application/json');
+			headers.set('Authorization', `Bearer ${getCookie('accessToken')}`);
+			return headers;
+		},
 	}),
 	tagTypes: ['Project'],
 	endpoints: (builder) => ({
-		getAllProjects: builder.query<Project[] | undefined, string>({
+		getAllProjects: builder.query<ProjectResponse[] | undefined, string>({
 			query: () => `/getAllProjects`,
 
 			async onCacheEntryAdded(arg, { dispatch, cacheDataLoaded }) {
@@ -22,17 +28,25 @@ export const apiProjectSlice = createApi({
 				dispatch(updateProject(response.data.data));
 			},
 		}),
-		getSingleProject: builder.query<Project, string>({
+		getSingleProject: builder.query<ProjectResponse, string>({
 			query: (slug) => `/getSingleProject/${slug}`,
+			transformResponse: (response: { data: ProjectResponse }, meta, arg) => {
+				const projectData = response.data;
+				delete projectData.brochure;
+				delete projectData.masterPlan;
+				delete projectData.thumbnail;
+				delete projectData.coverImages;
 
-			async onCacheEntryAdded(arg, { dispatch, cacheDataLoaded }) {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const response: any = await cacheDataLoaded;
-				console.log('Conseol', response.data.data);
-				// dispatch(updateProject(response.data.data));
+				console.log('Console--->', projectData);
+				return projectData;
 			},
+			// async onCacheEntryAdded(arg, { dispatch, cacheDataLoaded }) {
+			// 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			// 	const response: any = await cacheDataLoaded;
+			// 	// dispatch(updateProject(response.data.data));
+			// },
 		}),
-		deleteSingleProject: builder.mutation<Project, string>({
+		deleteSingleProject: builder.mutation<ProjectResponse, string>({
 			query: (body) => ({
 				url: `/deleteSingleProject`,
 				method: 'DELETE',
@@ -44,6 +58,13 @@ export const apiProjectSlice = createApi({
 				// dispatch(addNewMessage(response.data));
 			},
 		}),
+		createNewProject: builder.mutation<ProjectResponse, CreateProject>({
+			query: (body) => ({
+				url: `/createProject`,
+				method: 'POST',
+				body,
+			}),
+		}),
 	}),
 });
 
@@ -53,4 +74,5 @@ export const {
 	useGetAllProjectsQuery,
 	useGetSingleProjectQuery,
 	useDeleteSingleProjectMutation,
+	useCreateNewProjectMutation,
 } = apiProjectSlice;
